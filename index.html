@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Today's Scene</title>
+  <link rel="stylesheet" href="css/common.css">
+  <style>
+    :root {
+      --bg: #fdfcfb; --bg2: #f5f4f1; --ink-deep: #0a0a0a;
+      --accent: #111; --accent-2: #444; --accent-glow: rgba(0,0,0,.08);
+      --cream: #fff; --paper: #fdfcfb;
+      --ink: #111;
+      --border: rgba(17,17,17,.12); --border-strong: rgba(17,17,17,.3);
+      --w95: rgba(17,17,17,.95); --w65: rgba(17,17,17,.65);
+      --w40: rgba(17,17,17,.4); --w15: rgba(17,17,17,.08);
+      --r: 2px;
+      --fp: 'Pretendard', -apple-system, sans-serif;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box }
+    html { scroll-behavior: smooth }
+    body {
+      background: var(--bg); color: var(--w95);
+      font-family: var(--fp); -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    /* removed grain for cleaner look */
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 66px; padding: 0 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(253,252,251,.9);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(18px);
+    }
+    .nav-logo {
+      font-family: var(--fp); font-size: 1.15rem; font-weight: 700;
+      color: var(--ink); text-decoration: none; letter-spacing: -.01em;
+      display: flex; align-items: center; gap: .55rem;
+    }
+    .nav-logo em { font-style: normal; font-weight: 400; opacity: .6 }
+    .nav-links { display: flex; gap: 2rem; list-style: none; position: absolute; left: 50%; transform: translateX(-50%); }
+    .nav-links a {
+      font-size: .75rem; font-weight: 500; color: var(--w65);
+      text-decoration: none; letter-spacing: .08em; text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--accent) }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 8rem 2rem 5rem;
+      position: relative; overflow: hidden;
+      background: var(--bg);
+      transition: background 1.1s ease;
+    }
+    .hero::before {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 40%, transparent 10%, rgba(0,0,0,0.12) 100%);
+      pointer-events: none; z-index: 1; mix-blend-mode: multiply;
+    }
+    
+    /* Cinematic Poster Marquee Background */
+    .marquee-bg {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      display: flex; flex-direction: column; justify-content: center; gap: 2rem;
+      opacity: 0.12; transform: skewY(-5deg) scale(1.2);
+      filter: grayscale(80%) contrast(1.2);
+    }
+    .marquee-row {
+      display: flex; gap: 2rem; width: max-content;
+      animation: scrollMarquee 50s linear infinite;
+    }
+    .marquee-row.reverse { animation-direction: reverse; animation-duration: 60s; }
+    .marquee-poster {
+      width: 160px; aspect-ratio: 2/3; border-radius: 8px;
+      background-size: cover; background-position: center; background-color: var(--border);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    @keyframes scrollMarquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .hero > *:not(.marquee-bg) {
+      position: relative; z-index: 7;
+    }
+
+    .ticket {
+      display: inline-flex; align-items: center; gap: .5rem;
+      margin-bottom: 2rem; animation: fadeUp .6s ease both;
+    }
+    .ticket-txt { font-size: .65rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--w65) }
+
+    h1 {
+      font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 600;
+      line-height: 1.1; letter-spacing: -.03em; color: var(--w95);
+      max-width: 860px; margin-bottom: 1.2rem;
+      animation: fadeUp .8s ease both .1s; text-wrap: balance;
+    }
+    h1 em { font-style: normal; color: var(--w65); font-weight: 400; }
+
+    .sub {
+      font-size: 1.05rem; line-height: 1.6; color: var(--w65); max-width: 500px;
+      margin: 0 auto 3.5rem; font-weight: 400; animation: fadeUp .8s ease both .2s;
+    }
+
+    .mood-q {
+      font-size: .7rem; font-weight: 500; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 1.2rem; animation: fadeUp .8s ease both .28s;
+      display: flex; align-items: center; gap: .7rem; justify-content: center;
+    }
+    .mood-q::before, .mood-q::after { content: ""; width: 30px; height: 1px; background: var(--border-strong); }
+
+    /* ── NEW MOOD GRID ────────────────────────────────────── */
+    .mood-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .55rem;
+      max-width: 720px;
+      width: 100%;
+      animation: fadeUp .8s ease both .35s;
+    }
+    .mood-cell {
+      position: relative; display: flex; flex-direction: column;
+      align-items: flex-start; justify-content: center;
+      padding: 1.3rem 1.6rem 1.3rem 2rem;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.04);
+      cursor: pointer; overflow: hidden;
+      transition: transform .3s, border-color .3s, background .3s, box-shadow .3s;
+      text-align: left;
+    }
+    /* left accent bar */
+    .mood-cell::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: var(--mc, var(--gold)); opacity: 0;
+      transition: opacity .3s;
+    }
+    /* hover gradient wash */
+    .mood-cell::after {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 0% 50%, color-mix(in srgb, var(--mc, var(--gold)) 15%, transparent) 0%, transparent 65%);
+      opacity: 0; transition: opacity .4s;
+    }
+    .mood-cell:hover {
+      transform: translateX(3px);
+      border-color: color-mix(in srgb, var(--mc, var(--gold)) 60%, transparent);
+      background: rgba(26,22,18,.05);
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    .mood-cell:hover::before { opacity: 1 }
+    .mood-cell:hover::after  { opacity: 1 }
+    .mood-cell.active {
+      border-color: var(--gold);
+      background: #ffffff;
+      box-shadow: 0 8px 24px rgba(212,165,116,.2);
+      transform: translateX(0);
+    }
+    .mood-cell.active::before { opacity: 1; background: var(--gold) }
+
+    .mood-num {
+      position: absolute; top: .85rem; right: 1rem;
+      font-size: .58rem; font-weight: 500; letter-spacing: .2em;
+      color: rgba(26,22,18,.28); z-index: 1;
+    }
+    .mood-name {
+      font-size: 1rem; font-weight: 600; color: var(--ink); line-height: 1.2;
+      margin-bottom: .22rem; position: relative; z-index: 1;
+      transition: color .2s;
+    }
+    .mood-cell:hover .mood-name { color: var(--ink-deep) }
+    .mood-sub {
+      font-size: .65rem; font-weight: 400; letter-spacing: .16em;
+      text-transform: uppercase; color: rgba(26,22,18,.38);
+      position: relative; z-index: 1; transition: color .3s;
+    }
+    .mood-cell:hover .mood-sub { color: color-mix(in srgb, var(--mc, var(--gold)) 80%, rgba(255,255,255,.6)) }
+
+    /* mood accent colors (Stronger & more vibrant) */
+    [data-mood="melancholy"] { --mc: #4a90e2 } /* Deep Blue */
+    [data-mood="excited"]    { --mc: #f05a28 } /* Vibrant Orange */
+    [data-mood="romantic"]   { --mc: #e84a7e } /* Vivid Pink */
+    [data-mood="dark"]       { --mc: #8b5cf6 } /* Deep Purple */
+    [data-mood="cozy"]       { --mc: #f59e0b } /* Warm Amber */
+    [data-mood="wonder"]     { --mc: #0ea5e9 } /* Bright Cerulean */
+    [data-mood="funny"]      { --mc: #10b981 } /* Emerald Green */
+    [data-mood="thoughtful"] { --mc: #64748b } /* Slate Gray */
+
+    .scroll-hint {
+      margin-top: 2.2rem;
+      display: flex; flex-direction: column; align-items: center; gap: .45rem;
+      color: rgba(26,22,18,.35); font-size: .62rem; letter-spacing: .24em; text-transform: uppercase;
+      animation: fadeUp .8s ease both 1s; z-index: 8;
+    }
+    .scroll-arr { animation: bob 2s infinite; color: var(--gold) }
+    @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
+
+    /* ── INFO STRIP ── */
+    .strip {
+      background: var(--cream); color: var(--ink);
+      padding: 7rem 3.5rem; position: relative;
+      border-top: 1px solid var(--border);
+    }
+    .strip-head {
+      max-width: 1160px; margin: 0 auto 4rem;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+    }
+    .strip-eyebrow {
+      font-size: .75rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--accent-2); margin-bottom: 1rem;
+    }
+    .strip-title {
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 600;
+      line-height: 1.1; letter-spacing: -.03em; color: var(--ink); text-wrap: balance;
+    }
+    .strip-title em { font-style: normal; color: var(--w65); font-weight: 400 }
+    .strip-grid {
+      max-width: 1160px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem;
+    }
+    .stat-card {
+      padding: 2.5rem; background: var(--bg);
+      border: 1px solid var(--border); border-radius: var(--r);
+      transition: transform .3s;
+    }
+    .stat-card:hover { transform: translateY(-4px); border-color: var(--border-strong) }
+    .stat-serial {
+      font-size: .65rem; font-weight: 500; letter-spacing: .1em; color: var(--w40);
+      margin-bottom: 2rem; display: flex; justify-content: space-between;
+    }
+    .stat-num  { font-size: 3rem; font-weight: 600; line-height: 1; letter-spacing: -.04em; color: var(--accent); margin-bottom: 1rem }
+    .stat-label { font-size: 1.1rem; font-weight: 500; color: var(--ink); margin-bottom: .6rem }
+    .stat-desc  { font-size: .9rem; color: var(--w65); line-height: 1.6; font-weight: 400 }
+
+    /* ── FOOTER ── */
+    footer { background: var(--bg); padding: 0; border-top: 1px solid var(--border) }
+    .footer-row { display: flex; align-items: center; justify-content: space-between; padding: 2rem 3.5rem; gap: 1rem; flex-wrap: wrap }
+    .foot-logo { font-size: 1rem; font-weight: 600; color: var(--ink); text-decoration: none; letter-spacing: -.01em; display: flex; align-items: center; gap: .5rem }
+    .foot-logo em { font-style: normal; font-weight: 400; opacity: .6 }
+    .foot-links { display: flex; gap: 2rem }
+    .foot-links a { font-size: .75rem; font-weight: 500; color: var(--w40); text-decoration: none; letter-spacing: .08em; text-transform: uppercase; transition: color .2s }
+    .foot-links a:hover { color: var(--accent) }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    @media(max-width:900px) { .strip-grid{grid-template-columns:1fr} }
+    @media(max-width:640px) {
+      nav{padding:0 1.2rem} .nav-links{display:none}
+      .hero{padding:7rem 1.2rem 5rem}
+      .mood-grid{grid-template-columns:1fr; max-width:400px}
+      .strip{padding:4rem 1.2rem}
+      .footer-row{padding:1.3rem 1.2rem} .foot-links{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Today's <em>Scene</em></a>
+  <ul class="nav-links">
+    <li><a href="index.html">홈 (Home)</a></li>
+    <li><a href="about.html">소개 (About)</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="search-btn" onclick="openSearch()" title="영화 검색">⌕</button>
+  </div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="marquee-bg" id="marqueeBg"></div>
+
+  <p class="ticket"><span class="ticket-txt">Today's Feature</span></p>
+  <h1><em>Curated for</em><br>your current mood.</h1>
+  <p class="sub">지금 당신의 감정 상태에 맞는 완벽한 영화를 찾아보세요.<br>선택한 무드에 맞는 3편의 영화를 즉시 추천해 드립니다.</p>
+  <p class="mood-q">Select Your Mood</p>
+
+  <div class="mood-grid">
+    <button class="mood-cell" data-mood="melancholy" onclick="go(this)">
+      <span class="mood-num">01</span>
+      <span class="mood-name">Melancholy</span>
+      <span class="mood-sub">조용하고 차분한 무드</span>
+    </button>
+    <button class="mood-cell" data-mood="excited" onclick="go(this)">
+      <span class="mood-num">02</span>
+      <span class="mood-name">Thrilling</span>
+      <span class="mood-sub">강렬하고 짜릿한 무드</span>
+    </button>
+    <button class="mood-cell" data-mood="romantic" onclick="go(this)">
+      <span class="mood-num">03</span>
+      <span class="mood-name">Romantic</span>
+      <span class="mood-sub">부드럽고 낭만적인 무드</span>
+    </button>
+    <button class="mood-cell" data-mood="dark" onclick="go(this)">
+      <span class="mood-num">04</span>
+      <span class="mood-name">Tense</span>
+      <span class="mood-sub">어둡고 긴장감 넘치는 무드</span>
+    </button>
+    <button class="mood-cell" data-mood="cozy" onclick="go(this)">
+      <span class="mood-num">05</span>
+      <span class="mood-name">Cozy</span>
+      <span class="mood-sub">따뜻하고 편안한 무드</span>
+    </button>
+    <button class="mood-cell" data-mood="wonder" onclick="go(this)">
+      <span class="mood-num">06</span>
+      <span class="mood-name">Epic</span>
+      <span class="mood-sub">경이롭고 웅장한 무드</span>
+    </button>
+    <button class="mood-cell" data-mood="funny" onclick="go(this)">
+      <span class="mood-num">07</span>
+      <span class="mood-name">Lighthearted</span>
+      <span class="mood-sub">유쾌하고 가벼운 무드</span>
+    </button>
+    <button class="mood-cell" data-mood="thoughtful" onclick="go(this)">
+      <span class="mood-num">08</span>
+      <span class="mood-name">Thoughtful</span>
+      <span class="mood-sub">깊은 여운이 남는 무드</span>
+    </button>
+  </div>
+
+  <div class="scroll-hint"><span>Scroll</span><span class="scroll-arr">↓</span></div>
+</section>
+
+<section class="strip">
+  <div class="strip-head">
+    <p class="strip-eyebrow">Beyond Algorithms</p>
+    <h2 class="strip-title">Curated by <em>Emotion.</em></h2>
+    <p style="text-align:center; font-size:1.05rem; color:var(--w65); max-width:560px; margin: 1.2rem auto 0; line-height:1.6; font-weight:400;">
+      알고리즘이 주는 뻔한 추천은 이제 그만.<br>오직 당신의 <strong>기분과 감정</strong>에 집중하여 완벽한 작품을 큐레이션 합니다.
+    </p>
+  </div>
+  <div class="strip-grid">
+    <div class="stat-card">
+      <div class="stat-serial"><span>01</span><span>MOOD</span></div>
+      <div class="stat-num">8</div>
+      <div class="stat-label">Mood Categories</div>
+      <div class="stat-desc">가벼운 마음부터 깊은 여운까지, 당신이 지금 경험하고 싶은 감정을 정확하게 골라보세요.</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-serial"><span>02</span><span>CURATION</span></div>
+      <div class="stat-num">3</div>
+      <div class="stat-label">Handpicked Films</div>
+      <div class="stat-desc">수많은 목록에서 헤맬 필요 없이, 오늘 밤 어울리는 3편의 영화를 바로 찾아드립니다.</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-serial"><span>03</span><span>SPEED</span></div>
+      <div class="stat-num">3s</div>
+      <div class="stat-label">Time to Decide</div>
+      <div class="stat-desc">단 한 번의 클릭으로 고민 끝. 남은 시간은 오롯이 영화를 즐기는 데 쓰세요.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-row">
+    <a href="index.html" class="foot-logo">Today's <em>Scene</em></a>
+    <div class="foot-links">
+      <a href="about.html">About</a>
+      <a href="result.html">Curated</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/movies-data.js"></script>
+<script src="js/common.js"></script>
+<script>
+const BG = {
+  melancholy: 'radial-gradient(ellipse at 50% 25%, #f4f8fd 0%, #e8f0fe 60%, #cce0ff 100%)',
+  excited:    'radial-gradient(ellipse at 50% 25%, #fff5ea 0%, #ffe0bf 60%, #ffc894 100%)',
+  romantic:   'radial-gradient(ellipse at 50% 25%, #fff5f8 0%, #fde2ec 60%, #facce0 100%)',
+  dark:       'radial-gradient(ellipse at 50% 25%, #f9f5ff 0%, #f2e6ff 60%, #e2cbf5 100%)',
+  cozy:       'radial-gradient(ellipse at 50% 25%, #fff9e6 0%, #ffebb3 60%, #fcd66a 100%)',
+  wonder:     'radial-gradient(ellipse at 50% 25%, #f0fafb 0%, #e1f4fa 60%, #bdecfc 100%)',
+  funny:      'radial-gradient(ellipse at 50% 25%, #f2fcf5 0%, #e2fce9 60%, #c4f7d4 100%)',
+  thoughtful: 'radial-gradient(ellipse at 50% 25%, #f6f8fa 0%, #eef2f6 60%, #e2e8f0 100%)',
+};
+
+function go(btn) {
+  document.querySelectorAll('.mood-cell').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('hero').style.background = BG[btn.dataset.mood];
+  sessionStorage.setItem('mood', btn.dataset.mood);
+  setTimeout(() => { window.location.href = 'result.html' }, 480);
+}
+
+// Fetch trending movies for background marquee
+async function initMarquee() {
+  try {
+    const res = await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=07095f4f93d3be485e207578d4a61624&language=ko-KR`);
+    const data = await res.json();
+    if (data && data.results) {
+      const movies = data.results.filter(m => m.poster_path);
+      const row1 = movies.slice(0, Math.floor(movies.length / 2));
+      const row2 = movies.slice(Math.floor(movies.length / 2));
+      
+      const buildItems = (arr) => arr.map(m => `<div class="marquee-poster" style="background-image:url('https://image.tmdb.org/t/p/w500${m.poster_path}')"></div>`).join('');
+      
+      const r1Html = buildItems(row1);
+      const r2Html = buildItems(row2);
+      
+      // Duplicate for infinite scroll
+      document.getElementById('marqueeBg').innerHTML = `
+        <div class="marquee-row">${r1Html}${r1Html}</div>
+        <div class="marquee-row reverse">${r2Html}${r2Html}</div>
+        <div class="marquee-row">${r1Html}${r1Html}</div>
+      `;
+    }
+  } catch(e) { console.error('Marquee Error:', e); }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initMarquee();
+});
+
+document.querySelectorAll('.mood-cell').forEach(c => {
+  c.addEventListener('mouseenter', () => {
+    const color = getComputedStyle(c).getPropertyValue('--mc').trim();
+    if (color) {
+      document.body.style.setProperty('--orb-1', color);
+      document.body.style.setProperty('--orb-2', color);
+    }
+    const mood = c.dataset.mood;
+    if (BG[mood]) {
+      document.getElementById('hero').style.background = BG[mood];
+    }
+  });
+  c.addEventListener('mouseleave', () => {
+    document.body.style.removeProperty('--orb-1');
+    document.body.style.removeProperty('--orb-2');
+    if (!c.classList.contains('active')) {
+      document.getElementById('hero').style.background = 'var(--bg)';
+    }
+  });
+});
+</script>
+</body>
+</html>

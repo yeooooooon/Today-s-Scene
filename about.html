@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>소개 — 오늘의 씬</title>
+  <link rel="stylesheet" href="css/common.css">
+  <style>
+    :root {
+      --bg: #fdfcfb; --bg2: #f5f4f1; --ink-deep: #0a0a0a;
+      --accent: #111; --accent-2: #444; --accent-glow: rgba(0,0,0,.08);
+      --cream: #fff; --paper: #fdfcfb;
+      --ink: #111;
+      --border: rgba(17,17,17,.12); --border-strong: rgba(17,17,17,.3);
+      --w95: rgba(17,17,17,.95); --w65: rgba(17,17,17,.65);
+      --w40: rgba(17,17,17,.4); --w15: rgba(17,17,17,.08);
+      --r: 2px;
+      --fp: 'Pretendard', -apple-system, sans-serif;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box }
+    html { scroll-behavior: smooth }
+    body { background: var(--bg); color: var(--w95); font-family: var(--fp); -webkit-font-smoothing: antialiased }
+
+    nav { position: sticky; top: 0; z-index: 100; height: 66px; padding: 0 2.5rem; display: flex; align-items: center; justify-content: space-between; background: rgba(253,252,251,.9); border-bottom: 1px solid var(--border); backdrop-filter: blur(18px) }
+    .nav-logo { font-size: 1.15rem; font-weight: 700; color: var(--ink); text-decoration: none; letter-spacing: -.01em; display: flex; align-items: center; gap: .55rem }
+    .nav-logo em { font-style: normal; font-weight: 400; opacity: .6 }
+    .nav-links { display: flex; gap: 2rem; list-style: none; position: absolute; left: 50%; transform: translateX(-50%); }
+    .nav-links a { font-size: .75rem; font-weight: 500; color: var(--w65); text-decoration: none; letter-spacing: .08em; text-transform: uppercase; transition: color .2s }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent) }
+    .nav-cta { padding: .45rem 1rem; background: var(--accent); border: none; border-radius: 40px; color: var(--cream); font-family: var(--fp); font-size: .7rem; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; text-decoration: none; cursor: pointer; transition: all .2s }
+    .nav-cta:hover { background: var(--accent-2) }
+
+    /* HERO */
+    .about-hero {
+      background: var(--bg);
+      padding: 8rem 4rem 7rem; position: relative; overflow: hidden; border-bottom: 1px solid var(--border);
+    }
+    .ah-inner { max-width: 780px; position: relative; z-index: 1 }
+    .ah-tag {
+      display: inline-flex; align-items: center; gap: .7rem;
+      margin-bottom: 1.2rem; font-size: .65rem; font-weight: 500;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--w65);
+      animation: fadeUp .6s ease both;
+    }
+    .ah-title { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 600; line-height: 1.1; letter-spacing: -.03em; color: var(--ink); margin-bottom: 1.2rem; animation: fadeUp .8s ease both .1s; text-wrap: balance }
+    .ah-title em { font-style: normal; font-weight: 400; color: var(--w65) }
+    .ah-sub  { font-size: 1.05rem; line-height: 1.6; color: var(--w65); max-width: 640px; font-weight: 400; animation: fadeUp .8s ease both .2s; word-break: keep-all; }
+
+    /* shared section utils */
+    .section-label { font-size: .65rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 1rem; color: var(--accent-2) }
+    .section-title { font-size: clamp(2rem, 4.2vw, 3rem); font-weight: 600; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 1.5rem; text-wrap: balance }
+    .section-title em { font-style: normal; font-weight: 400; color: var(--w65) }
+
+    /* MISSION — light paper */
+    .mission { background: var(--bg2); color: var(--ink); padding: 6.5rem 3.5rem; position: relative }
+    .mission .section-title { color: var(--ink) }
+    .mission-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center }
+    .mission-text p { font-size: .95rem; line-height: 1.6; color: var(--w65); margin-bottom: 1rem; font-weight: 400 }
+    .mission-stats { display: flex; flex-direction: column; gap: 1rem }
+    .stat {
+      padding: 2rem; background: var(--bg);
+      border: 1px solid var(--border); border-radius: var(--r);
+      transition: transform .3s;
+    }
+    .stat:hover { transform: translateY(-3px); border-color: var(--border-strong) }
+    .stat-serial { font-size: .65rem; font-weight: 500; color: var(--w40); letter-spacing: .1em; margin-bottom: 1rem }
+    .stat-n     { font-size: 2.8rem; font-weight: 600; line-height: 1; letter-spacing: -.04em; color: var(--accent); margin-bottom: .5rem }
+    .stat-l     { font-size: 1.05rem; font-weight: 500; color: var(--ink); margin-bottom: .4rem }
+    .stat-d     { font-size: .85rem; color: var(--w65); line-height: 1.5; font-weight: 400 }
+
+    /* HOW */
+    .how { background: var(--bg); padding: 6.5rem 3.5rem; border-top: 1px solid var(--border) }
+    .how-inner { max-width: 1100px; margin: 0 auto }
+    .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-top: 3rem }
+    .step {
+      padding: 2rem; background: var(--bg2);
+      border: 1px solid var(--border); border-radius: var(--r);
+      transition: all .3s;
+    }
+    .step:hover { border-color: var(--border-strong); transform: translateY(-4px) }
+    .step-num   { font-size: 2.5rem; font-weight: 600; line-height: 1; letter-spacing: -.04em; color: var(--w40); margin-bottom: 1rem }
+    .step-title { font-size: 1.15rem; font-weight: 600; letter-spacing: -.02em; color: var(--ink); margin-bottom: .6rem }
+    .step-desc  { font-size: .88rem; line-height: 1.6; color: var(--w65); font-weight: 400 }
+
+    /* MOODS */
+    .moods-section { background: var(--bg2); padding: 6.5rem 3.5rem; border-top: 1px solid var(--border) }
+    .moods-inner { max-width: 1100px; margin: 0 auto }
+    .moods-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-top: 3rem }
+    .mood-item {
+      padding: 1.5rem 1.4rem; background: var(--bg);
+      border: 1px solid var(--border); border-radius: var(--r);
+      cursor: pointer; transition: all .25s; text-decoration: none; display: block;
+    }
+    .mood-item:hover { border-color: var(--border-strong); transform: translateY(-2px) }
+    .mood-num  { font-size: .6rem; font-weight: 500; letter-spacing: .1em; color: var(--w40); margin-bottom: .8rem; display: block }
+    .mood-name { font-size: 1.05rem; font-weight: 600; color: var(--ink); margin-bottom: .3rem; line-height: 1.2 }
+    .mood-desc { font-size: .75rem; font-weight: 400; color: var(--w65); line-height: 1.5 }
+
+    /* PHILOSOPHY */
+    .philosophy {
+      background: var(--bg); padding: 7rem 3.5rem; text-align: center; border-top: 1px solid var(--border);
+    }
+    .ph-inner { max-width: 800px; margin: 0 auto }
+    .ph-quote { font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 600; line-height: 1.1; letter-spacing: -.03em; color: var(--ink); margin-bottom: 2rem; text-wrap: balance }
+    .ph-quote em { font-style: normal; font-weight: 400; color: var(--w65) }
+    .ph-sub   { font-size: 1rem; color: var(--w65); line-height: 1.6; max-width: 500px; margin: 0 auto 3rem; font-weight: 400 }
+    .btn-accent {
+      display: inline-flex; align-items: center; gap: .6rem;
+      padding: 1rem 2.2rem; background: var(--accent); color: var(--cream);
+      border: none; border-radius: 40px; font-family: var(--fp);
+      font-size: .75rem; font-weight: 500; letter-spacing: .05em; text-transform: uppercase;
+      cursor: pointer; text-decoration: none; transition: all .2s;
+    }
+    .btn-accent:hover { background: var(--accent-2) }
+
+    footer { background: var(--bg2); padding: 0; border-top: 1px solid var(--border) }
+    .footer-row { display: flex; align-items: center; justify-content: space-between; padding: 2rem 3.5rem; gap: 1rem; flex-wrap: wrap }
+    .foot-logo { font-size: 1rem; font-weight: 600; color: var(--ink); text-decoration: none; letter-spacing: -.01em; display: flex; align-items: center; gap: .5rem }
+    .foot-logo em { font-style: normal; font-weight: 400; opacity: .6 }
+    .foot-links { display: flex; gap: 2rem }
+    .foot-links a { font-size: .75rem; font-weight: 500; color: var(--w40); text-decoration: none; letter-spacing: .08em; text-transform: uppercase; transition: color .2s }
+    .foot-links a:hover { color: var(--accent) }
+
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity .8s ease, transform .8s ease }
+    .reveal.on { opacity: 1; transform: none }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    @media(max-width:700px) {
+      nav { padding: 0 1.2rem } .nav-links { display: none }
+      .about-hero, .mission, .how, .moods-section, .philosophy { padding-left: 1.2rem; padding-right: 1.2rem }
+      .mission-inner { grid-template-columns: 1fr; gap: 2.5rem }
+      .steps { grid-template-columns: 1fr; gap: 1rem }
+      .moods-grid { grid-template-columns: 1fr 1fr; gap: .7rem }
+      .footer-row { padding: 1.3rem 1.2rem } .foot-links { display: none }
+    }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Today's <em>Scene</em></a>
+  <ul class="nav-links">
+    <li><a href="index.html">홈 (Home)</a></li>
+    <li><a href="about.html" class="active">소개 (About)</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="search-btn" onclick="openSearch()" title="영화 검색">⌕</button>
+  </div>
+</nav>
+
+<section class="about-hero">
+  <div class="ah-inner">
+    <p class="ah-tag">Our Mission</p>
+    <h1 class="ah-title">Feel, <em>Don't Scroll.</em></h1>
+    <p class="ah-sub">오늘의 씬(Today's Scene)은 단순한 알고리즘이 아닌 당신의 감정에 집중합니다.
+      <br>기분을 선택하면 완벽한 영화 3편을 즉시 찾아드립니다.</p>
+  </div>
+</section>
+
+<section class="mission">
+  <div class="mission-inner">
+    <div class="mission-text reveal">
+      <p class="section-label">The Problem</p>
+      <h2 class="section-title">The End of<br><em>Endless Scrolling.</em></h2>
+      <p>우리는 볼 것을 찾기 위해 평균 18분을 낭비합니다. 넷플릭스 목록만 내리다가 아무것도 보지 못하고 잠드는 일이 너무 많죠.</p>
+      <p>오늘의 씬은 바로 이 문제를 해결하기 위해 만들어졌습니다. 오늘 밤 당신의 무드를 알려주세요. 나머지는 저희가 알아서 할게요.</p>
+    </div>
+    <div class="mission-stats reveal">
+      <div class="stat"><div class="stat-serial">01 · TIME LOST</div><div class="stat-n">18m</div><div class="stat-l">평균 탐색 시간</div><div class="stat-d">볼 것을 찾기 위해 낭비되는 시간.</div></div>
+      <div class="stat"><div class="stat-serial">02 · SOLUTION</div><div class="stat-n">3s</div><div class="stat-l">영화 선택 완료</div><div class="stat-d">감정에 맞춘 즉각적인 추천 결과.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="how">
+  <div class="how-inner">
+    <div class="reveal">
+      <p class="section-label">How It Works</p>
+      <h2 class="section-title">Three Steps to<br><em>Your Film.</em></h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><div class="step-num">1</div><div class="step-title">무드 선택 (Select Mood)</div><div class="step-desc">짜릿한, 편안한, 혹은 로맨틱한 기분? 지금 당신의 감정을 고르세요.</div></div>
+      <div class="step reveal"><div class="step-num">2</div><div class="step-title">3편의 추천 (Get Three Films)</div><div class="step-desc">당신의 현재 감정 상태와 정확히 일치하는 3편의 추천 작품을 즉시 제공합니다.</div></div>
+      <div class="step reveal"><div class="step-num">3</div><div class="step-title">감상하기 (Enjoy)</div><div class="step-desc">더 이상의 고민 없이 영화의 세계로 빠져들어 보세요.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="moods-section">
+  <div class="moods-inner">
+    <div class="reveal">
+      <p class="section-label">Explore</p>
+      <h2 class="section-title">Discover By<br><em>Mood.</em></h2>
+    </div>
+    <div class="moods-grid">
+      <a href="index.html" class="mood-item reveal"><span class="mood-num">01</span><div class="mood-name">Melancholy</div><div class="mood-desc">조용하고 차분한 무드</div></a>
+      <a href="index.html" class="mood-item reveal"><span class="mood-num">02</span><div class="mood-name">Thrilling</div><div class="mood-desc">강렬하고 짜릿한 무드</div></a>
+      <a href="index.html" class="mood-item reveal"><span class="mood-num">03</span><div class="mood-name">Romantic</div><div class="mood-desc">부드럽고 낭만적인 무드</div></a>
+      <a href="index.html" class="mood-item reveal"><span class="mood-num">04</span><div class="mood-name">Tense</div><div class="mood-desc">어둡고 긴장감 넘치는 무드</div></a>
+      <a href="index.html" class="mood-item reveal"><span class="mood-num">05</span><div class="mood-name">Cozy</div><div class="mood-desc">따뜻하고 편안한 무드</div></a>
+      <a href="index.html" class="mood-item reveal"><span class="mood-num">06</span><div class="mood-name">Epic</div><div class="mood-desc">경이롭고 웅장한 무드</div></a>
+      <a href="index.html" class="mood-item reveal"><span class="mood-num">07</span><div class="mood-name">Lighthearted</div><div class="mood-desc">유쾌하고 가벼운 무드</div></a>
+      <a href="index.html" class="mood-item reveal"><span class="mood-num">08</span><div class="mood-name">Thoughtful</div><div class="mood-desc">깊은 여운이 남는 무드</div></a>
+    </div>
+  </div>
+</section>
+
+<section class="philosophy">
+  <div class="ph-inner">
+    <p class="ph-quote">A great film isn't just watched—<br><em>it's experienced.</em></p>
+    <p class="ph-sub">좋은 영화는 단순히 보는 것이 아니라 경험하는 것입니다.<br>오늘의 씬은 기술과 감정을 연결하여 알고리즘이 놓치는 감성을 채워줍니다.</p>
+    <a href="index.html" class="btn-accent">무드 선택하러 가기 →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-row">
+    <a href="index.html" class="foot-logo">Today's <em>Scene</em></a>
+    <div class="foot-links">
+      <a href="about.html">About</a>
+      <a href="result.html">Curated</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/movies-data.js"></script>
+<script src="js/common.js"></script>
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        e.target.style.transitionDelay = (i % 4) * .1 + 's';
+        e.target.classList.add('on');
+      }
+    });
+  }, { threshold: .12 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

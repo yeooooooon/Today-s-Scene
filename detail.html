@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>영화 상세 — 오늘의 씬</title>
+  <link rel="stylesheet" href="css/common.css">
+  <style>
+    :root {
+      --bg: #fdfcfb;
+      --bg2: #f5f4f1;
+      --ink-deep: #0a0a0a;
+      --accent: #111;
+      --accent-2: #444;
+      --accent-glow: rgba(0, 0, 0, .08);
+      --cream: #fff;
+      --paper: #fdfcfb;
+      --ink: #111;
+      --border: rgba(17, 17, 17, .12);
+      --border-strong: rgba(17, 17, 17, .3);
+      --w95: rgba(17, 17, 17, .95);
+      --w65: rgba(17, 17, 17, .65);
+      --w40: rgba(17, 17, 17, .4);
+      --w15: rgba(17, 17, 17, .08);
+      --r: 2px;
+      --fp: 'Pretendard', -apple-system, sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--fp);
+      -webkit-font-smoothing: antialiased
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--fp);
+      -webkit-font-smoothing: antialiased
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 66px;
+      padding: 0 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(253, 252, 251, .9);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(18px)
+    }
+
+    .nav-logo {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--ink);
+      text-decoration: none;
+      letter-spacing: -.01em;
+      display: flex;
+      align-items: center;
+      gap: .55rem
+    }
+
+    .nav-logo em {
+      font-style: normal;
+      font-weight: 400;
+      opacity: .6
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-links a {
+      font-size: .75rem;
+      font-weight: 500;
+      color: var(--w65);
+      text-decoration: none;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: color .2s
+    }
+
+    .nav-links a:hover {
+      color: var(--accent)
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .45rem 1rem;
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      border-radius: 40px;
+      color: var(--accent);
+      font-size: .7rem;
+      font-weight: 500;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all .25s
+    }
+
+    .nav-back:hover {
+      background: var(--accent);
+      color: var(--cream)
+    }
+
+    /* BACKDROP */
+    .backdrop {
+      position: relative;
+      min-height: max(520px, 75vh);
+      background: var(--bg2)
+    }
+
+    .trailer-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 1s ease, visibility 1s ease;
+      pointer-events: none;
+      z-index: 1;
+      background: #000
+    }
+
+    .trailer-bg.playing {
+      opacity: 1;
+      visibility: visible
+    }
+
+    .trailer-bg iframe {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(120vw, 213.33vh);
+      height: max(67.5vw, 120vh);
+      transform: translate(-50%, -50%);
+      border: none;
+      pointer-events: none
+    }
+
+    .trailer-shield {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      cursor: default
+    }
+
+    .backdrop-img {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: .2;
+      transition: opacity .6s;
+      z-index: 2;
+      filter: saturate(.4) contrast(1.1)
+    }
+
+    .backdrop.trailer-on .backdrop-img {
+      opacity: 0
+    }
+
+    .backdrop-grad {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(253, 252, 251, .4) 0%, rgba(253, 252, 251, .8) 55%, var(--bg) 100%);
+      pointer-events: none;
+      z-index: 4;
+      transition: opacity 1s ease;
+    }
+
+    .backdrop.trailer-on .backdrop-grad {
+      opacity: 0;
+    }
+
+    .backdrop::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(10, 10, 10, .5) 0%, rgba(10, 10, 10, .7) 60%, var(--bg) 100%);
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .backdrop.trailer-on::after {
+      opacity: 1;
+    }
+
+    /* 시네마틱 모드: 트레일러 재생 시 글자색을 하얗게 반전시켜 대비(Contrast)를 높입니다 */
+    .backdrop.trailer-on .movie-title,
+    .backdrop.trailer-on .movie-desc,
+    .backdrop.trailer-on .movie-original,
+    .backdrop.trailer-on .movie-info,
+    .backdrop.trailer-on .now-showing,
+    .backdrop.trailer-on .score-label,
+    .backdrop.trailer-on .score-stars,
+    .backdrop.trailer-on .big-score,
+    .backdrop.trailer-on .big-score small,
+    .backdrop.trailer-on .tag-year {
+      color: #ffffff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      transition: color 1s ease, text-shadow 1s ease;
+    }
+
+    .backdrop.trailer-on .tag-genre {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border-color: rgba(255,255,255,0.3);
+      transition: all 1s ease;
+    }
+
+    .backdrop.trailer-on .desc-toggle {
+      color: rgba(255,255,255,0.8);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+
+    .backdrop.trailer-on .btn-ghost {
+      border-color: rgba(255,255,255,0.4);
+      color: #fff;
+    }
+    .backdrop.trailer-on .btn-ghost:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: #fff;
+    }
+
+    .backdrop-side-grad {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(253, 252, 251, .3) 0%, transparent 30%, transparent 70%, rgba(253, 252, 251, .3) 100%);
+      pointer-events: none;
+      z-index: 4;
+      transition: opacity 1s ease;
+    }
+
+    .backdrop.trailer-on .backdrop-side-grad {
+      opacity: 0;
+    }
+
+    .mute-btn {
+      position: absolute;
+      bottom: 1.3rem;
+      right: 1.5rem;
+      z-index: 10;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .9);
+      border: 1px solid var(--border-strong);
+      color: var(--accent);
+      font-size: 1rem;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+      transition: all .2s
+    }
+
+    .mute-btn:hover {
+      background: var(--accent);
+      color: var(--cream)
+    }
+
+    .backdrop.trailer-on .mute-btn {
+      display: inline-flex
+    }
+
+    .now-showing {
+      position: absolute;
+      top: 1.3rem;
+      left: 2rem;
+      z-index: 6;
+      font-size: .65rem;
+      font-weight: 500;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--w65);
+      display: flex;
+      align-items: center;
+      gap: .65rem
+    }
+
+    .now-showing::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--w65);
+      animation: pulseDot 1.7s infinite
+    }
+
+    @keyframes pulseDot {
+
+      0%,
+      100% {
+        opacity: .8
+      }
+
+      50% {
+        opacity: .3
+      }
+    }
+
+    .movie-hero {
+      position: relative;
+      z-index: 5;
+      padding: 4.5rem 3.5rem 4rem;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 3.5rem;
+      align-items: start;
+      max-width: 1100px;
+      margin: 0 auto
+    }
+
+    /* poster frame */
+    .poster-frame {
+      position: relative;
+      width: 260px;
+      padding: 8px;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, .08), 0 0 0 1px var(--border)
+    }
+
+    .big-poster {
+      width: 100%;
+      aspect-ratio: 2/3;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--bg2);
+      border-radius: 2px
+    }
+
+    .movie-info {
+      color: var(--ink)
+    }
+
+    .movie-tags {
+      display: flex;
+      gap: .45rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.4rem
+    }
+
+    .tag {
+      padding: .3rem .75rem;
+      border-radius: var(--r);
+      font-size: .65rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      border: 1px solid var(--border)
+    }
+
+    .tag-genre {
+      background: var(--bg2);
+      color: var(--accent-2);
+      border-color: var(--border-strong)
+    }
+
+    .tag-year {
+      background: transparent;
+      color: var(--w65)
+    }
+
+    .movie-title {
+      font-size: clamp(2.4rem, 5vw, 4.2rem);
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: -.03em;
+      color: var(--ink);
+      margin-bottom: .6rem;
+      text-wrap: balance
+    }
+
+    .movie-original {
+      font-size: .95rem;
+      font-weight: 400;
+      color: var(--w65);
+      margin-bottom: 2rem;
+      font-style: italic
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+      margin-bottom: 2rem;
+      padding: 1.2rem 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border)
+    }
+
+    .big-score {
+      font-size: 2.8rem;
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: -.03em;
+      color: var(--accent)
+    }
+
+    .big-score small {
+      font-size: .7rem;
+      font-weight: 400;
+      color: var(--w40);
+      letter-spacing: .05em
+    }
+
+    .score-stars {
+      font-size: 1.1rem;
+      color: var(--accent);
+      letter-spacing: .1em
+    }
+
+    .score-label {
+      font-size: .6rem;
+      font-weight: 500;
+      color: var(--w40);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-top: .3rem
+    }
+
+    .movie-desc {
+      font-size: .95rem;
+      line-height: 1.7;
+      color: var(--w65);
+      max-width: 600px;
+      margin-bottom: .9rem;
+      font-weight: 400
+    }
+
+    .movie-desc.collapsed {
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden
+    }
+
+    .desc-toggle {
+      background: none;
+      border: none;
+      color: var(--accent-2);
+      font-family: var(--fp);
+      font-size: .65rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 1.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      transition: opacity .2s
+    }
+
+    .desc-toggle:hover {
+      opacity: .7
+    }
+
+    .desc-toggle.hidden {
+      display: none
+    }
+
+    .action-row {
+      display: flex;
+      gap: .8rem;
+      flex-wrap: wrap
+    }
+
+    .btn-gold {
+      padding: 1rem 1.8rem;
+      background: var(--accent);
+      color: var(--cream);
+      border: none;
+      border-radius: 40px;
+      font-family: var(--fp);
+      font-size: .7rem;
+      font-weight: 500;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-gold:hover {
+      background: var(--accent-2)
+    }
+
+    .btn-ghost {
+      padding: 1rem 1.8rem;
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--border-strong);
+      border-radius: 40px;
+      font-family: var(--fp);
+      font-size: .7rem;
+      font-weight: 500;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg2);
+      border-color: var(--accent)
+    }
+
+    /* DETAILS */
+    .details-section {
+      padding: 4rem 3.5rem;
+      max-width: 1100px;
+      margin: 0 auto
+    }
+
+    .section-h {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem
+    }
+
+    .section-h h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      letter-spacing: -.03em;
+      color: var(--ink)
+    }
+
+    .section-h h2 em {
+      font-style: normal;
+      color: var(--w65);
+      font-weight: 400
+    }
+
+    .section-num {
+      font-size: .65rem;
+      font-weight: 500;
+      color: var(--accent-2);
+      letter-spacing: .1em;
+      text-transform: uppercase
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden
+    }
+
+    .detail-item {
+      padding: 1.5rem;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2)
+    }
+
+    .detail-item:nth-child(3n) {
+      border-right: none
+    }
+
+    .detail-item:nth-last-child(-n+3) {
+      border-bottom: none
+    }
+
+    .detail-label {
+      font-size: .65rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--w65);
+      margin-bottom: .6rem
+    }
+
+    .detail-val {
+      font-size: .95rem;
+      font-weight: 500;
+      color: var(--ink)
+    }
+
+    /* REVIEWS */
+    .review-section {
+      padding: 4rem 3.5rem;
+      max-width: 1100px;
+      margin: 0 auto
+    }
+
+    .review-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.8rem;
+      flex-wrap: wrap;
+      gap: 1rem
+    }
+
+    .review-count {
+      font-size: .7rem;
+      font-weight: 500;
+      color: var(--w40);
+      letter-spacing: .05em;
+      text-transform: uppercase
+    }
+
+    .review-count strong {
+      color: var(--accent);
+      font-weight: 600
+    }
+
+    .review-form {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 200px auto;
+      gap: 1.4rem;
+      align-items: end;
+      margin-bottom: 1.2rem;
+      justify-content: start;
+    }
+
+    .fg label {
+      display: block;
+      font-size: .65rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent-2);
+      margin-bottom: .6rem
+    }
+
+    .fg input,
+    .fg textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: .8rem 1rem;
+      font-family: var(--fp);
+      font-size: .9rem;
+      font-weight: 400;
+      color: var(--ink);
+      transition: border-color .2s;
+      outline: none
+    }
+
+    .fg input::placeholder,
+    .fg textarea::placeholder {
+      color: var(--w40);
+      font-weight: 300
+    }
+
+    .fg input:focus,
+    .fg textarea:focus {
+      border-color: var(--accent)
+    }
+
+    .fg textarea {
+      resize: vertical;
+      min-height: 160px;
+      font-size: 1rem;
+      line-height: 1.7
+    }
+
+    .star-input {
+      display: inline-flex;
+      gap: .4rem;
+      align-items: center;
+      justify-content: center;
+      height: 44px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      font-size: 1.4rem;
+      cursor: pointer;
+      padding: 0 1.2rem;
+      transition: border-color .2s;
+    }
+
+    .star-input:hover {
+      border-color: var(--border-strong)
+    }
+
+    .star-input span {
+      color: var(--border-strong);
+      transition: color .15s, transform .15s;
+      user-select: none
+    }
+
+    .star-input span.on {
+      color: var(--accent)
+    }
+
+    .btn-submit {
+      padding: .8rem 1.8rem;
+      background: var(--accent);
+      color: var(--cream);
+      border: none;
+      border-radius: 40px;
+      font-family: var(--fp);
+      font-size: .7rem;
+      font-weight: 500;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .btn-submit:hover {
+      background: var(--accent-2)
+    }
+
+    .btn-submit:disabled {
+      opacity: .4;
+      cursor: not-allowed
+    }
+
+    .review-list {
+      display: flex;
+      flex-direction: column;
+      gap: .8rem
+    }
+
+    .review-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      transition: border-color .2s
+    }
+
+    .review-item:hover {
+      border-color: var(--border-strong)
+    }
+
+    .review-content {
+      flex: 1;
+      min-width: 0
+    }
+
+    .review-top {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      margin-bottom: .6rem;
+      flex-wrap: wrap
+    }
+
+    .review-name {
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--ink)
+    }
+
+    .review-stars {
+      color: var(--accent);
+      font-size: .85rem;
+      letter-spacing: .05em
+    }
+
+    .review-date {
+      font-size: .65rem;
+      font-weight: 400;
+      color: var(--w40);
+      margin-left: auto;
+      letter-spacing: .05em
+    }
+
+    .review-text {
+      font-size: .9rem;
+      line-height: 1.6;
+      color: var(--w65);
+      word-break: break-word;
+      font-weight: 400
+    }
+
+    .review-delete {
+      background: none;
+      border: none;
+      color: var(--w40);
+      cursor: pointer;
+      font-size: .9rem;
+      padding: .3rem;
+      transition: color .2s;
+      flex-shrink: 0
+    }
+
+    .review-delete:hover {
+      color: #cc4444
+    }
+
+    .review-empty {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--w40);
+      font-size: .9rem;
+      line-height: 1.7;
+      font-weight: 300;
+      border: 1px dashed var(--border);
+      border-radius: var(--r)
+    }
+
+    /* MORE */
+    .more-section {
+      padding: 4rem 3.5rem 6rem;
+      max-width: 1100px;
+      margin: 0 auto
+    }
+
+    .more-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem
+    }
+
+    .more-card {
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--bg);
+      transition: all .2s
+    }
+
+    .more-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-3px)
+    }
+
+    .more-poster {
+      height: 220px;
+      background-size: cover;
+      background-position: center top;
+      background-color: var(--bg2);
+      position: relative;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .more-body {
+      padding: 1.2rem
+    }
+
+    .more-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -.02em;
+      color: var(--ink);
+      margin-bottom: .4rem;
+      line-height: 1.2
+    }
+
+    .more-meta {
+      font-size: .7rem;
+      font-weight: 400;
+      color: var(--w40);
+      letter-spacing: .05em;
+      text-transform: uppercase
+    }
+
+    .more-meta strong {
+      color: var(--accent);
+      font-weight: 600
+    }
+
+    footer {
+      background: var(--bg);
+      padding: 0;
+      border-top: 1px solid var(--border)
+    }
+
+    .footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2rem 3.5rem;
+      gap: 1rem;
+      flex-wrap: wrap
+    }
+
+    .foot-logo {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ink);
+      text-decoration: none;
+      letter-spacing: -.01em;
+      display: flex;
+      align-items: center;
+      gap: .5rem
+    }
+
+    .foot-logo em {
+      font-style: normal;
+      font-weight: 400;
+      opacity: .6
+    }
+
+    .foot-links {
+      display: flex;
+      gap: 2rem
+    }
+
+    .foot-links a {
+      font-size: .75rem;
+      font-weight: 500;
+      color: var(--w40);
+      text-decoration: none;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: color .2s
+    }
+
+    .foot-links a:hover {
+      color: var(--accent)
+    }
+
+    .loading-state {
+      max-width: 900px;
+      margin: 5rem auto;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--w65);
+      font-size: .8rem;
+      font-weight: 400;
+      letter-spacing: .1em;
+      text-transform: uppercase
+    }
+
+    .loading-spinner {
+      width: 34px;
+      height: 34px;
+      margin: 0 auto 1.4rem;
+      border: 1px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .error-state {
+      max-width: 900px;
+      margin: 3rem auto;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #884444;
+      background: rgba(136, 68, 68, .05);
+      border: 1px solid rgba(136, 68, 68, .2);
+      border-radius: var(--r);
+      font-size: .9rem;
+      line-height: 1.6
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--ink);
+      color: var(--cream);
+      padding: .9rem 1.7rem;
+      border-radius: var(--r);
+      font-size: .75rem;
+      font-weight: 500;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: all .3s;
+      pointer-events: none;
+      z-index: 300
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0)
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--w15);
+      margin: 0 3.5rem
+    }
+
+    @media(max-width:700px) {
+      nav {
+        padding: 0 1.2rem
+      }
+
+      .nav-links {
+        display: none
+      }
+
+      .movie-hero {
+        grid-template-columns: 1fr;
+        padding: 3rem 1.2rem;
+        gap: 2rem
+      }
+
+      .poster-frame,
+      .big-poster {
+        width: 180px
+      }
+
+      .details-section,
+      .review-section,
+      .more-section {
+        padding-left: 1.2rem;
+        padding-right: 1.2rem
+      }
+
+      .details-grid {
+        grid-template-columns: 1fr
+      }
+
+      .detail-item {
+        border-right: none
+      }
+
+      .more-grid {
+        grid-template-columns: 1fr 1fr
+      }
+
+      .form-row {
+        grid-template-columns: 1fr
+      }
+
+      .footer-row {
+        padding: 1.3rem 1.2rem
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <a href="index.html" class="nav-logo">Today's <em>Scene</em></a>
+    <ul class="nav-links">
+      <li><a href="index.html">홈 (Home)</a></li>
+      <li><a href="about.html">소개 (About)</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="search-btn" onclick="openSearch()" title="영화 검색">⌕</button>
+      <a href="result.html" class="nav-back">← 돌아가기</a>
+    </div>
+  </nav>
+
+  <div class="backdrop" id="backdrop">
+    <div class="trailer-bg" id="trailerBg"></div>
+    <div class="trailer-shield"></div>
+    <div class="backdrop-img" id="backdropImg"></div>
+    <div class="backdrop-grad"></div>
+    <div class="backdrop-side-grad"></div>
+    <div class="now-showing">Now Showing</div>
+    <button class="mute-btn" id="muteBtn" onclick="toggleMute()" title="소리 켜기/끄기">🔇</button>
+    <div class="movie-hero" id="movieHero">
+      <div class="loading-state" style="grid-column:1/-1">
+        <div class="loading-spinner"></div>
+        <p>Loading…</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="details-section" id="detailsSection" style="display:none">
+    <div class="section-h"><span class="section-num">01</span>
+      <h2>영화 <em>정보 (Details)</em></h2>
+    </div>
+    <div class="details-grid" id="detailsGrid"></div>
+  </div>
+  <hr class="divider" id="divider1" style="display:none" />
+
+  <div class="review-section" id="reviewSection" style="display:none">
+    <div class="section-h"><span class="section-num">02</span>
+      <h2>관람객 <em>리뷰 (Reviews)</em></h2>
+    </div>
+    <div class="review-head">
+      <p class="review-count">총 <strong id="reviewCount">0</strong>개의 리뷰</p>
+    </div>
+    <div class="review-form">
+      <div class="form-row">
+        <div class="fg">
+          <label>닉네임 (Nickname)</label>
+          <input type="text" id="rvName" placeholder="익명으로 남기기" maxlength="20" />
+        </div>
+        <div class="fg">
+          <label>평점 (Rating)</label>
+          <div class="star-input" id="starInput">
+            <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span
+              data-v="5">★</span>
+          </div>
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:1.2rem">
+        <label>한줄 감상 (Review)</label>
+        <textarea id="rvText" placeholder="이 영화에 대한 솔직한 감상을 남겨주세요..." maxlength="300"></textarea>
+      </div>
+      <button class="btn-submit" onclick="submitReview()">리뷰 등록</button>
+    </div>
+    <div class="review-list" id="reviewList"></div>
+  </div>
+  <hr class="divider" id="divider2" style="display:none" />
+
+  <div class="more-section" id="moreSection" style="display:none">
+    <div class="section-h"><span class="section-num">03</span>
+      <h2>비슷한 무드의 <em>다른 작품</em></h2>
+    </div>
+    <div class="more-grid" id="moreGrid"></div>
+  </div>
+
+  <footer>
+    <div class="footer-row">
+      <a href="index.html" class="foot-logo">Today's <em>Scene</em></a>
+      <div class="foot-links">
+        <a href="about.html">About</a>
+        <a href="result.html">Curated</a>
+      </div>
+    </div>
+  </footer>
+  <div class="toast" id="toast"></div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="js/movies-data.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    let currentMovieId = null, starVal = 0;
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2500);
+    }
+    function getAllReviews() { return JSON.parse(localStorage.getItem('movieReviews') || '{}') }
+    function getReviews(movieId) { return getAllReviews()[movieId] || [] }
+    function saveReviews(movieId, reviews) { const all = getAllReviews(); all[movieId] = reviews; localStorage.setItem('movieReviews', JSON.stringify(all)) }
+    function setupStars() {
+      const stars = [...document.querySelectorAll('#starInput span')];
+      stars.forEach(s => {
+        s.onmouseenter = () => { stars.forEach(x => x.classList.remove('on')); stars.filter(x => +x.dataset.v <= +s.dataset.v).forEach(x => x.classList.add('on')) };
+        s.onclick = () => { starVal = +s.dataset.v };
+      });
+      document.getElementById('starInput').onmouseleave = () => { stars.forEach(x => x.classList.remove('on')); stars.filter(x => +x.dataset.v <= starVal).forEach(x => x.classList.add('on')) };
+    }
+    function submitReview() {
+      const name = document.getElementById('rvName').value.trim() || '익명(Anonymous)';
+      const text = document.getElementById('rvText').value.trim();
+      if (!text) { showToast('감상을 입력해주세요.'); return }
+      if (!starVal) { showToast('평점을 선택해주세요.'); return }
+      const reviews = getReviews(currentMovieId);
+      reviews.unshift({ id: Date.now(), name, text, stars: starVal, date: new Date().toLocaleDateString('ko-KR') });
+      saveReviews(currentMovieId, reviews);
+      document.getElementById('rvName').value = '';
+      document.getElementById('rvText').value = '';
+      starVal = 0;
+      document.querySelectorAll('#starInput span').forEach(s => s.classList.remove('on'));
+      renderReviews(); showToast('✓ 리뷰 등록 완료');
+    }
+    function deleteReview(reviewId) {
+      if (!confirm('이 리뷰를 삭제하시겠습니까?')) return;
+      const reviews = getReviews(currentMovieId).filter(r => r.id !== reviewId);
+      saveReviews(currentMovieId, reviews); renderReviews(); showToast('리뷰가 삭제되었습니다.');
+    }
+    function renderReviews() {
+      const reviews = getReviews(currentMovieId);
+      const list = document.getElementById('reviewList');
+      document.getElementById('reviewCount').textContent = reviews.length;
+      if (reviews.length === 0) { list.innerHTML = '<div class="review-empty">아직 리뷰가 없습니다. ✨<br>첫 번째 감상을 남겨보세요!</div>'; return }
+      list.innerHTML = reviews.map(r => `
+    <div class="review-item">
+      <div class="review-content">
+        <div class="review-top">
+          <span class="review-name">${escapeHtml(r.name)}</span>
+          <span class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</span>
+          <span class="review-date">${r.date}</span>
+        </div>
+        <p class="review-text">${escapeHtml(r.text)}</p>
+      </div>
+      <button class="review-delete" onclick="deleteReview(${r.id})" title="삭제">✕</button>
+    </div>`).join('');
+    }
+    function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML }
+
+    // trailer logic (preserved exactly)
+    let ytPlayer = null, ytApiReady = false, pendingPlay = null, isMuted = true;
+    if (window.YT && window.YT.Player) ytApiReady = true;
+    window.onYouTubeIframeAPIReady = () => { ytApiReady = true; if (pendingPlay) { pendingPlay(); pendingPlay = null } };
+    async function setupTrailerBackground(movieId) {
+      let candidates; try { candidates = await fetchTrailerCandidates(movieId) } catch (e) { return }
+      if (!candidates || candidates.length === 0) return;
+      const tryPlay = () => attemptTrailer(candidates, 0);
+      if (ytApiReady && window.YT && window.YT.Player) { tryPlay() } else {
+        pendingPlay = tryPlay;
+        let wc = 0; const wt = setInterval(() => {
+          wc++;
+          if (window.YT && window.YT.Player) { clearInterval(wt); if (pendingPlay) { ytApiReady = true; pendingPlay(); pendingPlay = null } }
+          else if (wc > 50) { clearInterval(wt) }
+        }, 100);
+      }
+    }
+    function forceHighestQuality(p) {
+      if (!p || typeof p.getAvailableQualityLevels !== 'function') return;
+      try { const l = p.getAvailableQualityLevels(); p.setPlaybackQuality((l && l.length > 0 ? l.find(q => q !== 'auto') || l[0] : 'hd1080')) } catch (e) { }
+    }
+    function attemptTrailer(candidates, index) {
+      if (index >= candidates.length) return;
+      const videoKey = candidates[index];
+      if (ytPlayer) { try { ytPlayer.destroy() } catch (e) { } ytPlayer = null }
+      const container = document.getElementById('trailerBg'); container.innerHTML = '<div id="ytPlayer"></div>';
+      let started = false;
+      const tid = setTimeout(() => { if (!started) attemptTrailer(candidates, index + 1) }, 5000);
+      ytPlayer = new YT.Player('ytPlayer', {
+        videoId: videoKey,
+        playerVars: { autoplay: 1, mute: 1, controls: 0, modestbranding: 1, rel: 0, showinfo: 0, iv_load_policy: 3, loop: 1, playlist: videoKey, playsinline: 1, disablekb: 1, fs: 0, cc_load_policy: 0, vq: 'hd1080', hd: 1 },
+        events: {
+          onReady: (e) => { try { e.target.mute(); forceHighestQuality(e.target); e.target.playVideo() } catch (err) { } },
+          onStateChange: (e) => {
+            const bg = document.getElementById('trailerBg'), bd = document.getElementById('backdrop');
+            if (e.data === YT.PlayerState.PLAYING) {
+              if (!started) {
+                started = true; clearTimeout(tid); forceHighestQuality(e.target);
+                setTimeout(() => { bd.classList.add('trailer-on'); bg.classList.add('playing'); }, 3800);
+              } else {
+                bd.classList.add('trailer-on'); bg.classList.add('playing');
+              }
+            }
+            else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) { bg.classList.remove('playing'); bd.classList.remove('trailer-on') }
+          },
+          onPlaybackQualityChange: (e) => { if (!['hd2160', 'hd1440', 'hd1080'].includes(e.data)) forceHighestQuality(e.target) },
+          onError: (e) => { clearTimeout(tid); attemptTrailer(candidates, index + 1) },
+        }
+      });
+    }
+    function toggleMute() {
+      if (!ytPlayer || typeof ytPlayer.isMuted !== 'function') return;
+      const btn = document.getElementById('muteBtn');
+      if (isMuted) { ytPlayer.unMute(); isMuted = false; btn.textContent = '🔊'; btn.title = 'Mute' }
+      else { ytPlayer.mute(); isMuted = true; btn.textContent = '🔇'; btn.title = 'Unmute' }
+    }
+    function scrollToReview() { document.getElementById('reviewSection').scrollIntoView({ behavior: 'smooth', block: 'start' }) }
+    function toggleDesc() {
+      const desc = document.getElementById('movieDesc'), btn = document.getElementById('descToggle');
+      if (desc.classList.contains('collapsed')) { desc.classList.remove('collapsed'); btn.textContent = '접기 ↑' }
+      else { desc.classList.add('collapsed'); btn.textContent = '더보기 ↓'; desc.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }
+    }
+    function checkDescOverflow() {
+      const desc = document.getElementById('movieDesc'), btn = document.getElementById('descToggle');
+      if (!desc || !btn) return;
+      const ch = desc.clientHeight; desc.classList.remove('collapsed'); const fh = desc.clientHeight; desc.classList.add('collapsed');
+      if (fh <= ch + 2) btn.classList.add('hidden');
+    }
+
+    async function loadDetail() {
+      const movieId = sessionStorage.getItem('movieId') || 38;
+      currentMovieId = movieId;
+      const mood = sessionStorage.getItem('mood') || 'melancholy';
+      try {
+        const m = await fetchMovieWithCredits(movieId);
+        if (m.backdrop_path) document.getElementById('backdropImg').style.backgroundImage = `url(${posterUrl(m.backdrop_path, true)})`;
+        document.title = `${m.title} — 오늘의 씬`;
+        const year = m.release_date ? m.release_date.slice(0, 4) : '—';
+        const rating = m.vote_average ? m.vote_average.toFixed(1) : '—';
+        const stars = m.vote_average ? Math.round(m.vote_average / 2) : 0;
+        const country = (m.production_countries && m.production_countries[0]) ? m.production_countries[0].name : '—';
+        const director = getDirector(m.credits);
+        const cast = getMainCast(m.credits);
+        const genres = getGenres(m.genres);
+        const runtime = formatRuntime(m.runtime);
+
+        document.getElementById('movieHero').innerHTML = `
+      <div class="poster-frame">
+        <div class="big-poster" id="bigPoster" style="background-image:url('${posterUrl(m.poster_path)}')"></div>
+      </div>
+      <div class="movie-info">
+        <div class="movie-tags">
+          <span class="tag tag-genre">${genres || 'Drama'}</span>
+          <span class="tag tag-year">${year}</span>
+          <span class="tag tag-year">${country}</span>
+        </div>
+        <h1 class="movie-title">${m.title}</h1>
+        <p class="movie-original">${m.original_title || ''}</p>
+        <div class="score-row">
+          <div><div class="big-score">${rating}<small>/10</small></div><div class="score-label"></div></div>
+          <div><div class="score-stars">${'★'.repeat(stars)}${'☆'.repeat(5 - stars)}</div><div class="score-label">관람객 평가 (Audience)</div></div>
+        </div>
+        <p class="movie-desc collapsed" id="movieDesc">${m.overview || '줄거리 정보가 제공되지 않는 영화입니다.'}</p>
+        <button class="desc-toggle" id="descToggle" onclick="toggleDesc()">더보기 ↓</button>
+        <div class="action-row">
+          <button class="btn-gold" onclick="scrollToReview()">리뷰 남기기 ✍</button>
+          <button class="btn-ghost" onclick="window.location.href='result.html'">다른 추천 보기 →</button>
+        </div>
+      </div>`;
+
+        document.getElementById('detailsSection').style.display = 'block';
+        document.getElementById('divider1').style.display = 'block';
+        document.getElementById('detailsGrid').innerHTML = [['감독(Director)', director || '—'], ['출연(Cast)', cast || '—'], ['개봉(Released)', year], ['러닝타임', runtime], ['장르(Genre)', genres || '—'], ['국가(Country)', country]].map(([l, v]) => `<div class="detail-item"><div class="detail-label">${l}</div><div class="detail-val">${v}</div></div>`).join('');
+        checkDescOverflow();
+        document.getElementById('reviewSection').style.display = 'block';
+        document.getElementById('divider2').style.display = 'block';
+        setupStars(); renderReviews(); setupTrailerBackground(movieId);
+
+        const moodData = MOOD_DATA[mood];
+        if (moodData) {
+          const otherIds = pickRandom(moodData.moviePool.filter(id => id !== parseInt(movieId)), 3);
+          if (otherIds.length > 0) {
+            const others = await Promise.all(otherIds.map(id => fetchMovie(id)));
+            document.getElementById('moreSection').style.display = 'block';
+            document.getElementById('moreGrid').innerHTML = others.map(o => `
+          <div class="more-card" onclick="sessionStorage.setItem('movieId',${o.id});location.reload()">
+            <div class="more-poster" style="background-image:url('${posterUrl(o.poster_path)}')"></div>
+            <div class="more-body">
+              <div class="more-title">${o.title}</div>
+              <div class="more-meta">${o.release_date ? o.release_date.slice(0, 4) : '—'} · <strong>★ ${o.vote_average ? o.vote_average.toFixed(1) : '—'}</strong></div>
+            </div>
+          </div>`).join('');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('movieHero').innerHTML = `<div class="error-state" style="grid-column:1/-1"><p>영화 정보를 불러오지 못했습니다.</p><p style="margin-top:.5rem;font-size:.8rem;color:#aaa">API 키 또는 네트워크 상태를 확인해주세요.</p></div>`;
+      }
+    }
+    loadDetail();
+  </script>
+</body>
+
+</html>

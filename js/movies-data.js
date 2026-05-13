@@ -1,0 +1,290 @@
+// ==========================================
+// 오늘의 씬 - 영화 데이터 + TMDB API 연동
+// ==========================================
+// ⚠️ 본인 API 키로 교체하세요!
+const TMDB_API_KEY = '07095f4f93d3be485e207578d4a61624';
+const TMDB_BASE = 'https://api.themoviedb.org/3';
+const TMDB_IMG = 'https://image.tmdb.org/t/p/w500';
+const TMDB_IMG_LG = 'https://image.tmdb.org/t/p/original';
+
+// ==========================================
+// 무드별 영화 풀 (각 15편) + 추천 이유 풀
+// 같은 무드를 골라도 매번 랜덤으로 3편씩!
+// ==========================================
+const MOOD_DATA = {
+  melancholy: {
+    label: '🌧️ 조용하고 쓸쓸한 밤',
+    title: '쓸쓸한 밤을 위한',
+    bg: 'linear-gradient(160deg,#f2f5f8 0%,#e8ecef 55%,#dfe4e8 100%)',
+    moviePool: [
+      152601, 153, 376867, 38, 334541, 398818, 2841,
+      84892, 428449, 62215, 258480, 142
+    ],
+    reasonPool: [
+      '혼자 있는 밤, 이 영화가 조용히 곁에 있어줄 거예요',
+      '잔잔하지만 오래 마음에 남는 여운이 있는 영화예요',
+      '슬프지만 동시에 아름다운, 묘한 감동의 영화예요',
+      '비 오는 밤 따뜻한 음료 한 잔이랑 보면 완벽해요',
+      '엔딩 크레딧 올라가도 한참 자리에서 못 일어날 거예요',
+      '혼자 있는 시간을 더 깊게 만들어주는 영화예요',
+      '먹먹한 감정이 오래 가슴에 남는 영화예요',
+      '지치고 쓸쓸한 밤, 조용히 위로해주는 영화예요',
+    ],
+  },
+  excited: {
+    label: '⚡ 짜릿하고 신나는 밤',
+    title: '짜릿한 밤을 위한',
+    bg: 'linear-gradient(160deg,#fff5ed 0%,#fceedf 45%,#f5e4d3 100%)',
+    moviePool: [
+      76341, 155, 27205, 245891, 353081, 339403, 299536,
+      324857, 603, 1571, 280, 361743
+    ],
+    reasonPool: [
+      '무조건 몰입 보장. 중간에 자리를 떠날 수 없어요',
+      '사운드 좋은 환경에서 보면 완전히 다른 경험이에요',
+      '짜릿함을 넘어 충격까지 — 강렬한 밤 보장',
+      '아드레날린이 폭발하는 액션 시퀀스가 압권이에요',
+      '큰 화면에서 봐야 진짜 맛이 나는 영화예요',
+      '심장이 뛰는 걸 느끼고 싶은 밤에 딱이에요',
+      '시작부터 끝까지 한순간도 지루할 틈이 없어요',
+      '에너지가 필요한 날 밤, 보고 나면 기분 전환 완료',
+    ],
+  },
+  romantic: {
+    label: '🌸 설레고 감성적인 밤',
+    title: '감성적인 밤을 위한',
+    bg: 'linear-gradient(160deg,#fff0f5 0%,#fbe4ea 58%,#f5d8e0 100%)',
+    moviePool: [
+      122906, 313369, 76, 11036, 1091, 508, 19913,
+      4348, 597, 50646, 222935, 82693
+    ],
+    reasonPool: [
+      '설레는 감정 그 자체를 2시간 동안 느낄 수 있어요',
+      '연애 경험이 있는 사람이라면 누구나 공감해요',
+      '보고 나서 한동안 OST가 머릿속을 맴돌 거예요',
+      '두근거리는 마음이 그리워질 때 딱이에요',
+      '첫사랑이 떠오르는, 감성 충만한 영화예요',
+      '소중한 사람과 함께 봐도 좋은 따뜻한 영화예요',
+      '마음이 몽글몽글해지는 영화예요',
+      '사랑이라는 감정의 모든 색깔을 보여주는 영화예요',
+    ],
+  },
+  dark: {
+    label: '🌑 어둡고 긴장되는 밤',
+    title: '긴장되는 밤을 위한',
+    bg: 'linear-gradient(160deg,#f0f0f2 0%,#e6e6ea 42%,#dbdbe0 100%)',
+    moviePool: [
+      807, 274, 210577, 146233, 11324, 1593, 242582,
+      496243, 6977, 694, 539, 530385
+    ],
+    reasonPool: [
+      '긴장감이 극에 달하는 밤, 이 영화라면 충분해요',
+      '보고 나서 오래 생각하게 되는, 여운이 짙은 영화예요',
+      '몰입도 극강의 심리 스릴러, 집중하고 보세요',
+      '소름이 돋는 분위기를 즐기고 싶은 밤에요',
+      '어두운 인간 본성을 들여다보는 영화예요',
+      '결말까지 숨이 차오르는 긴장감의 연속이에요',
+      '한 번 보면 잊히지 않는 강렬한 영화예요',
+      '예상치 못한 반전이 기다리고 있어요',
+    ],
+  },
+  cozy: {
+    label: '☕ 따뜻하고 편안한 밤',
+    title: '편안한 밤을 위한',
+    bg: 'linear-gradient(160deg,#fffdf5 0%,#fbf5e6 58%,#f5ecd3 100%)',
+    moviePool: [
+      257211, 773, 194, 129, 324852, 116745, 24803,
+      16859, 2062, 129, 13, 120467
+    ],
+    reasonPool: [
+      '담요 덮고 따뜻한 음료 한 잔과 함께 보면 완벽해요',
+      '보고 나면 지금 이 순간이 소중하게 느껴져요',
+      '지치고 힘든 날, 꼭 안아주는 것 같은 영화예요',
+      '마음이 따뜻해지는 잔잔한 위로가 되는 영화예요',
+      '온 가족이 같이 봐도 좋은 따뜻한 영화예요',
+      '하루의 피로가 풀리는, 마음을 어루만져주는 영화예요',
+      '슬며시 미소짓게 만드는, 그런 영화예요',
+      '추운 계절에 이불 속에서 보면 완벽해요',
+    ],
+  },
+  wonder: {
+    label: '🌌 경이롭고 웅장한 밤',
+    title: '웅장한 밤을 위한',
+    bg: 'linear-gradient(160deg,#f0f7fb 0%,#e6f0f5 52%,#dae7ed 100%)',
+    moviePool: [
+      157336, 329865, 62, 49047, 286217, 27205, 550988,
+      24428, 1726, 13475, 76341, 49026, 119450, 8392, 12,
+    ],
+    reasonPool: [
+      '사운드 좋은 환경에서 보면 경험이 완전히 달라져요',
+      '끝나고 한참 동안 아무 말도 하고 싶지 않아질 영화예요',
+      '영화라기보다 하나의 우주적 경험에 가까워요',
+      '큰 화면, 좋은 사운드 시스템에서 봐야 제맛이에요',
+      '인간이 얼마나 작은 존재인지 느끼게 되는 영화예요',
+      '세상의 광활함을 몸으로 느끼는 영화예요',
+      '경이로움이라는 단어의 정확한 의미를 알게 돼요',
+      '영화관에서 봤어야 했다는 후회가 남을 작품이에요',
+    ],
+  },
+  funny: {
+    label: '😂 가볍고 웃기고 싶은 밤',
+    title: '웃고 싶은 밤을 위한',
+    bg: 'linear-gradient(160deg,#fbfdf0 0%,#f5f8e6 58%,#edf2db 100%)',
+    moviePool: [
+      120467, 14160, 316029, 9806, 105, 9536, 585,
+      9487, 772, 10193, 12, 8392, 38757, 2062, 150540,
+    ],
+    reasonPool: [
+      '웃고 싶은데 내용도 있었으면 하는 밤에 딱이에요',
+      '울다가 웃다가, 기분이 정화되는 느낌이에요',
+      '엔딩에서 같이 노래 부르고 싶어질 거예요',
+      '실컷 웃고 나면 스트레스가 싹 풀려요',
+      '가볍게 즐기고 싶은 날 밤에 완벽해요',
+      '웃음 코드가 통통 튀는, 부담 없는 영화예요',
+      '친구랑 같이 보면 더 재밌어요',
+      '복잡한 생각 다 내려놓고 그냥 즐기세요',
+    ],
+  },
+  thoughtful: {
+    label: '🤔 생각에 잠기는 밤',
+    title: '생각하고 싶은 밤을 위한',
+    bg: 'linear-gradient(160deg,#f4f3f0 0%,#ebe9e4 58%,#e0ddd7 100%)',
+    moviePool: [
+      496243, 37799, 152601, 550, 13, 11324, 77,
+      398818, 466272, 27205, 1422, 489, 16869, 4922, 1726,
+    ],
+    reasonPool: [
+      '보고 나서 혼자서 한참 생각하게 되는 영화예요',
+      '보고 나면 SNS 알림을 잠깐 꺼두고 싶어져요',
+      '보고 나면 인간 관계에 대해 한참 생각하게 돼요',
+      '엔딩 크레딧 올라갈 때 멍하니 앉아있게 돼요',
+      '한 번 더 봐야 진짜 의미가 보이는 영화예요',
+      '인생에 대해 다시 생각하게 만드는 영화예요',
+      '보고 나면 누군가와 이야기 나누고 싶어져요',
+      '오래 기억에 남는, 묵직한 영화예요',
+    ],
+  },
+};
+
+// ==========================================
+// 랜덤으로 N개 뽑기
+// ==========================================
+function pickRandom(arr, n) {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
+
+// 오늘의 추천 영화 3편 + 추천 이유 3개 가져오기
+function getTodaysPick(mood) {
+  const data = MOOD_DATA[mood];
+  if (!data) return null;
+  return {
+    label: data.label,
+    title: data.title,
+    bg: data.bg,
+    movies: pickRandom(data.moviePool, 3),
+    reasons: pickRandom(data.reasonPool, 3),
+  };
+}
+
+// ==========================================
+// TMDB API 호출 함수
+// ==========================================
+
+async function fetchMovie(movieId) {
+  const url = `${TMDB_BASE}/movie/${movieId}?api_key=${TMDB_API_KEY}&language=ko-KR`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('영화 정보를 가져오지 못했어요');
+  return await res.json();
+}
+
+async function fetchMovieWithCredits(movieId) {
+  const url = `${TMDB_BASE}/movie/${movieId}?api_key=${TMDB_API_KEY}&language=ko-KR&append_to_response=credits`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('영화 정보를 가져오지 못했어요');
+  return await res.json();
+}
+
+function posterUrl(path, large = false) {
+  if (!path) return null;
+  return (large ? TMDB_IMG_LG : TMDB_IMG) + path;
+}
+
+function getDirector(credits) {
+  if (!credits || !credits.crew) return '';
+  const dir = credits.crew.find(c => c.job === 'Director');
+  return dir ? dir.name : '';
+}
+
+function getMainCast(credits) {
+  if (!credits || !credits.cast) return '';
+  return credits.cast.slice(0, 3).map(c => c.name).join(', ');
+}
+
+function getGenres(genres) {
+  if (!genres) return '';
+  return genres.slice(0, 2).map(g => g.name).join(' · ');
+}
+
+function formatRuntime(minutes) {
+  if (!minutes) return '—';
+  return `${minutes}분`;
+}
+
+// ==========================================
+// 영화 검색 (TMDB /search/movie)
+// ==========================================
+async function searchMovies(query) {
+  if (!query || !query.trim()) return [];
+  const url = `${TMDB_BASE}/search/movie?api_key=${TMDB_API_KEY}&language=ko-KR&query=${encodeURIComponent(query)}&include_adult=false`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('검색에 실패했어요');
+  const data = await res.json();
+  return data.results || [];
+}
+
+// ==========================================
+// 영화 트레일러 후보 리스트 가져오기
+// 연령제한/임베드 차단된 영상이 있을 수 있으므로
+// 여러 후보를 우선순위 정렬해서 반환 → 클라이언트에서 순차 시도
+// ==========================================
+async function fetchTrailerCandidates(movieId) {
+  // 한국어 + 영어 결과를 합쳐서 우선순위로 정렬
+  const fetchVideos = async (lang) => {
+    const url = `${TMDB_BASE}/movie/${movieId}/videos?api_key=${TMDB_API_KEY}&language=${lang}`;
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.results || [];
+  };
+
+  const [koVideos, enVideos] = await Promise.all([
+    fetchVideos('ko-KR'),
+    fetchVideos('en-US'),
+  ]);
+
+  // 중복 제거 (key 기준)
+  const seen = new Set();
+  const all = [...koVideos, ...enVideos].filter(v => {
+    if (seen.has(v.key)) return false;
+    seen.add(v.key);
+    return v.site === 'YouTube';
+  });
+
+  // 우선순위 점수 계산
+  // - 공식(official) trailer가 가장 좋음
+  // - Trailer > Teaser > Clip
+  // - 최신 영상 우선
+  const score = (v) => {
+    let s = 0;
+    if (v.type === 'Trailer') s += 100;
+    else if (v.type === 'Teaser') s += 50;
+    else if (v.type === 'Clip') s += 20;
+    if (v.official) s += 30;
+    return s;
+  };
+
+  return all
+    .sort((a, b) => score(b) - score(a))
+    .map(v => v.key);
+}
