@@ -55,7 +55,7 @@
     .cards-section { max-width: 900px; margin: 0 auto; padding: 4rem 3.5rem }
     .cards-wrap { display: flex; flex-direction: column; gap: 2.5rem }
     .card {
-      display: grid; grid-template-columns: 140px 1fr auto; gap: 2rem;
+      display: grid; grid-template-columns: 45px 140px 1fr auto; gap: 2rem;
       background: var(--bg); border: 1px solid var(--border);
       border-radius: var(--r); padding: 1.5rem;
       transition: border-color .3s, transform .3s, box-shadow .3s;
@@ -64,14 +64,19 @@
     .card:hover { border-color: var(--border-strong); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.04) }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(20px) } to { opacity: 1; transform: translateY(0) } }
 
-    .poster-wrap { position: relative; width: 140px; flex-shrink: 0 }
-    .poster-num {
-      position: absolute; top: -10px; left: -10px; z-index: 2;
-      width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--cream);
-      display: flex; align-items: center; justify-content: center;
-      font-size: .8rem; font-weight: 600;
+    .card-rank {
+      font-size: 2.2rem;
+      font-family: 'Pretendard';
+      font-weight: 600;
+      font-style: italic;
+      color: var(--w40);
+      text-align: right;
+      padding-top: 0.2rem;
+      user-select: none;
     }
-    .poster { width: 140px; aspect-ratio: 2/3; border-radius: 2px; background: var(--border); background-size: cover; background-position: center; border: 1px solid var(--border) }
+
+    .poster-wrap { position: relative; width: 140px; flex-shrink: 0 }
+    .poster { width: 140px; aspect-ratio: 2/3; border-radius: 2px; background: var(--border); background-size: cover; background-position: center; border: 1px solid var(--border); position: relative; z-index: 1; }
 
     .card-body { min-width: 0; padding-top: .2rem }
     .card-n {
@@ -120,7 +125,8 @@
     @media(max-width:700px) {
       nav{padding:0 1.2rem} .nav-links{display:none}
       .hero-band, .cards-section, .reset { padding-left: 1.2rem; padding-right: 1.2rem }
-      .card { grid-template-columns: 90px 1fr; gap: 1.1rem }
+      .card { grid-template-columns: 24px 90px 1fr; gap: 1.1rem }
+      .card-rank { font-size: 1.4rem; padding-top: 0; }
       .poster-wrap, .poster { width: 90px }
       .card-side { flex-direction: row; flex-wrap: wrap; grid-column: 1/-1; justify-content: flex-start; align-items: center }
       .card-score { display: none }
@@ -230,9 +236,9 @@ async function loadResults() {
       const why    = data.reasons[i] || '';
       return `
         <div class="card" style="animation-delay: ${i * 0.3 + 0.2}s">
+          <div class="card-rank">0${i + 1}</div>
           <div class="poster-wrap">
             <div class="poster" style="background-image: url('${poster}')"></div>
-            <div class="poster-num">${i + 1}</div>
           </div>
           <div class="card-body">
             <p class="card-n">Feature ${String(i+1).padStart(2,'0')}</p>
