@@ -12,9 +12,6 @@ const TMDB_IMG_LG = 'https://image.tmdb.org/t/p/original';
 // ==========================================
 const MOOD_DATA = {
   melancholy: {
-    label: '🌧️ 조용하고 쓸쓸한 밤',
-    title: '쓸쓸한 밤을 위한',
-    bg: 'linear-gradient(160deg,#f2f5f8 0%,#e8ecef 55%,#dfe4e8 100%)',
     moviePool: [
       // 명작 클래식
       152601, 153, 38, 334541, 376867, 84892, 62215, 142, 428449, 2841, 489, 1124,
@@ -33,9 +30,6 @@ const MOOD_DATA = {
     ],
   },
   excited: {
-    label: '⚡ 짜릿하고 신나는 밤',
-    title: '짜릿한 밤을 위한',
-    bg: 'linear-gradient(160deg,#fff5ed 0%,#fceedf 45%,#f5e4d3 100%)',
     moviePool: [
       // 명작 클래식
       27205, 155, 76341, 299536, 245891, 603, 280, 1571, 575264, 1726, 118340,
@@ -54,9 +48,6 @@ const MOOD_DATA = {
     ],
   },
   romantic: {
-    label: '🌸 설레고 감성적인 밤',
-    title: '감성적인 밤을 위한',
-    bg: 'linear-gradient(160deg,#fff0f5 0%,#fbe4ea 58%,#f5d8e0 100%)',
     moviePool: [
       // 명작 클래식 (어바웃 타임, 노트북, 라라랜드 등)
       122906, 11036, 313369, 597, 76, 508, 19913, 4348, 50646, 13,
@@ -75,9 +66,6 @@ const MOOD_DATA = {
     ],
   },
   dark: {
-    label: '🌑 어둡고 긴장되는 밤',
-    title: '긴장되는 밤을 위한',
-    bg: 'linear-gradient(160deg,#f0f0f2 0%,#e6e6ea 42%,#dbdbe0 100%)',
     moviePool: [
       // 명작 클래식
       807, 274, 210577, 419430, 496243, 11324, 146233, 1593, 242582, 694, 539,
@@ -96,9 +84,6 @@ const MOOD_DATA = {
     ],
   },
   cozy: {
-    label: '☕ 따뜻하고 편안한 밤',
-    title: '편안한 밤을 위한',
-    bg: 'linear-gradient(160deg,#fffdf5 0%,#fbf5e6 58%,#f5ecd3 100%)',
     moviePool: [
       // 명작 클래식
       129, 8392, 257211, 773, 324852, 194, 24803, 16859, 2062, 13, 120467,
@@ -117,9 +102,6 @@ const MOOD_DATA = {
     ],
   },
   wonder: {
-    label: '🌌 경이롭고 웅장한 밤',
-    title: '웅장한 밤을 위한',
-    bg: 'linear-gradient(160deg,#f0f7fb 0%,#e6f0f5 52%,#dae7ed 100%)',
     moviePool: [
       // 명작 클래식
       157336, 19995, 671, 120, 49047, 329865, 62, 286217, 24428, 13475, 119450,
@@ -138,9 +120,6 @@ const MOOD_DATA = {
     ],
   },
   funny: {
-    label: '😂 가볍고 웃기고 싶은 밤',
-    title: '웃고 싶은 밤을 위한',
-    bg: 'linear-gradient(160deg,#fbfdf0 0%,#f5f8e6 58%,#edf2db 100%)',
     moviePool: [
       // 명작 클래식
       18785, 8363, 293660, 64688, 12133, 14160, 9806, 105, 9536, 585, 2062,
@@ -159,9 +138,6 @@ const MOOD_DATA = {
     ],
   },
   thoughtful: {
-    label: '🤔 생각에 잠기는 밤',
-    title: '생각하고 싶은 밤을 위한',
-    bg: 'linear-gradient(160deg,#f4f3f0 0%,#ebe9e4 58%,#e0ddd7 100%)',
     moviePool: [
       // 명작 클래식
       496243, 329865, 37165, 603, 550, 37799, 152601, 13, 11324, 77, 398818, 1422,
@@ -194,9 +170,6 @@ function getTodaysPick(mood) {
   const data = MOOD_DATA[mood];
   if (!data) return null;
   return {
-    label: data.label,
-    title: data.title,
-    bg: data.bg,
     movies: pickRandom(data.moviePool, 3),
     reasons: pickRandom(data.reasonPool, 3),
   };
