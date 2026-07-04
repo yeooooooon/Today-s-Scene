@@ -165,14 +165,24 @@ function pickRandom(arr, n) {
   return shuffled.slice(0, n);
 }
 
-// 오늘의 추천 영화 3편 + 추천 이유 3개 가져오기
-function getTodaysPick(mood) {
-  const data = MOOD_DATA[mood];
-  if (!data) return null;
-  return {
-    movies: pickRandom(data.moviePool, 3),
-    reasons: pickRandom(data.reasonPool, 3),
-  };
+// 오늘의 추천 영화 3편 + 추천 이유 3개 가져오기 (백엔드 연동 완료)
+async function getTodaysPick(mood) {
+  try {
+    const res = await fetch(`http://localhost:8080/api/moods/${mood}`);
+    if (!res.ok) throw new Error('백엔드에서 데이터를 가져오지 못했습니다.');
+    const data = await res.json();
+    
+    const moviePool = data.movies.map(m => m.movieId);
+    const reasonPool = data.reasons.map(r => r.reasonText);
+
+    return {
+      movies: pickRandom(moviePool, 3),
+      reasons: pickRandom(reasonPool, 3),
+    };
+  } catch (err) {
+    console.error("백엔드 연동 에러:", err);
+    return null;
+  }
 }
 
 // ==========================================

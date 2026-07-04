@@ -191,7 +191,7 @@ function goDetail(movieId) {
 }
 async function loadResults() {
   const mood = sessionStorage.getItem('mood') || 'melancholy';
-  const pick = getTodaysPick(mood);
+  const pick = await getTodaysPick(mood);
   if (!pick) {
     document.getElementById('cardsWrap').innerHTML = '<div class="error-state">무드 정보를 찾을 수 없어요. 홈에서 다시 선택해주세요.</div>';
     return;

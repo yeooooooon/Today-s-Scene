@@ -1170,9 +1170,14 @@
       t.textContent = msg; t.classList.add('show');
       clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2500);
     }
-    function getAllReviews() { return JSON.parse(localStorage.getItem('movieReviews') || '{}') }
-    function getReviews(movieId) { return getAllReviews()[movieId] || [] }
-    function saveReviews(movieId, reviews) { const all = getAllReviews(); all[movieId] = reviews; localStorage.setItem('movieReviews', JSON.stringify(all)) }
+    // 기존 로컬스토리지 함수들 삭제 (백엔드 연동)
+    async function loadReviewsFromBackend() {
+      try {
+        const res = await fetch(`http://localhost:8080/api/movies/${currentMovieId}/reviews`);
+        if (!res.ok) return [];
+        return await res.json();
+      } catch (err) { return []; }
+    }
     function setupStars() {
       const stars = [...document.querySelectorAll('#starInput span')];
       stars.forEach(s => {
@@ -1181,42 +1186,53 @@
       });
       document.getElementById('starInput').onmouseleave = () => { stars.forEach(x => x.classList.remove('on')); stars.filter(x => +x.dataset.v <= starVal).forEach(x => x.classList.add('on')) };
     }
-    function submitReview() {
+    async function submitReview() {
       const name = document.getElementById('rvName').value.trim() || '익명(Anonymous)';
       const text = document.getElementById('rvText').value.trim();
       if (!text) { showToast('감상을 입력해주세요.'); return }
       if (!starVal) { showToast('평점을 선택해주세요.'); return }
-      const reviews = getReviews(currentMovieId);
-      reviews.unshift({ id: Date.now(), name, text, stars: starVal, date: new Date().toLocaleDateString('ko-KR') });
-      saveReviews(currentMovieId, reviews);
-      document.getElementById('rvName').value = '';
-      document.getElementById('rvText').value = '';
-      starVal = 0;
-      document.querySelectorAll('#starInput span').forEach(s => s.classList.remove('on'));
-      renderReviews(); showToast('✓ 리뷰 등록 완료');
+
+      const payload = { authorName: name, content: text, rating: starVal };
+
+      try {
+        await fetch(`http://localhost:8080/api/movies/${currentMovieId}/reviews`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        document.getElementById('rvName').value = '';
+        document.getElementById('rvText').value = '';
+        starVal = 0;
+        document.querySelectorAll('#starInput span').forEach(s => s.classList.remove('on'));
+        showToast('✓ 리뷰 등록 완료');
+        renderReviews();
+      } catch (err) {
+        showToast('리뷰 등록에 실패했습니다.');
+      }
     }
     function deleteReview(reviewId) {
-      if (!confirm('이 리뷰를 삭제하시겠습니까?')) return;
-      const reviews = getReviews(currentMovieId).filter(r => r.id !== reviewId);
-      saveReviews(currentMovieId, reviews); renderReviews(); showToast('리뷰가 삭제되었습니다.');
+      showToast('삭제 기능은 백엔드에서 준비 중입니다.');
     }
-    function renderReviews() {
-      const reviews = getReviews(currentMovieId);
+    async function renderReviews() {
+      const reviews = await loadReviewsFromBackend();
       const list = document.getElementById('reviewList');
       document.getElementById('reviewCount').textContent = reviews.length;
       if (reviews.length === 0) { list.innerHTML = '<div class="review-empty">아직 리뷰가 없습니다. ✨<br>첫 번째 감상을 남겨보세요!</div>'; return }
-      list.innerHTML = reviews.map(r => `
+      list.innerHTML = reviews.map(r => {
+        const dateStr = new Date(r.createdAt).toLocaleDateString('ko-KR');
+        return `
     <div class="review-item">
       <div class="review-content">
         <div class="review-top">
-          <span class="review-name">${escapeHtml(r.name)}</span>
-          <span class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</span>
-          <span class="review-date">${r.date}</span>
+          <span class="review-name">${escapeHtml(r.authorName)}</span>
+          <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+          <span class="review-date">${dateStr}</span>
         </div>
-        <p class="review-text">${escapeHtml(r.text)}</p>
+        <p class="review-text">${escapeHtml(r.content)}</p>
       </div>
-      <button class="review-delete" onclick="deleteReview(${r.id})" title="삭제">✕</button>
-    </div>`).join('');
+      <button class="review-delete" onclick="deleteReview(${r.reviewId})" title="삭제">✕</button>
+    </div>`}).join('');
     }
     function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML }
 
