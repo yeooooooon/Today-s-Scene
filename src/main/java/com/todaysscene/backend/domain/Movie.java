@@ -1,4 +1,4 @@
-package com.todaysscene.backend.entity;
+package com.todaysscene.backend.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;

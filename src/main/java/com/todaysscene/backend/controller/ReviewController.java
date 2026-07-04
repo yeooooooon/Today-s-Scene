@@ -1,7 +1,7 @@
 package com.todaysscene.backend.controller;
 
-import com.todaysscene.backend.entity.Movie;
-import com.todaysscene.backend.entity.Review;
+import com.todaysscene.backend.domain.Movie;
+import com.todaysscene.backend.domain.Review;
 import com.todaysscene.backend.repository.MovieRepository;
 import com.todaysscene.backend.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class ReviewController {
             Movie newMovie = new Movie();
             newMovie.setMovieId(movieId);
             movieRepository.save(newMovie);
-            
+
             reviewRequest.setMovie(newMovie);
             Review savedReview = reviewRepository.save(reviewRequest);
             return ResponseEntity.ok(savedReview);

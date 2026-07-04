@@ -1,6 +1,6 @@
 package com.todaysscene.backend.controller;
 
-import com.todaysscene.backend.entity.Movie;
+import com.todaysscene.backend.domain.Movie;
 import com.todaysscene.backend.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/movies")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Allow requests from frontend
+@CrossOrigin(origins = "*")
 public class MovieController {
 
     private final MovieRepository movieRepository;

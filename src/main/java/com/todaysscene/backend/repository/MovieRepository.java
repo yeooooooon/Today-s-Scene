@@ -1,6 +1,6 @@
 package com.todaysscene.backend.repository;
 
-import com.todaysscene.backend.entity.Movie;
+import com.todaysscene.backend.domain.Movie;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

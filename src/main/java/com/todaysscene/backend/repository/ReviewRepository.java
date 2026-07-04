@@ -1,6 +1,6 @@
 package com.todaysscene.backend.repository;
 
-import com.todaysscene.backend.entity.Review;
+import com.todaysscene.backend.domain.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

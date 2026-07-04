@@ -1,4 +1,4 @@
-package com.todaysscene.backend.entity;
+package com.todaysscene.backend.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,11 +20,7 @@ public class Mood {
     private String moodId;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "mood_movies",
-        joinColumns = @JoinColumn(name = "mood_id"),
-        inverseJoinColumns = @JoinColumn(name = "movie_id")
-    )
+    @JoinTable(name = "mood_movies", joinColumns = @JoinColumn(name = "mood_id"), inverseJoinColumns = @JoinColumn(name = "movie_id"))
     @JsonIgnoreProperties("moods")
     private Set<Movie> movies = new HashSet<>();
 

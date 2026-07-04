@@ -1,7 +1,7 @@
 package com.todaysscene.backend.controller;
 
-import com.todaysscene.backend.entity.Mood;
-import com.todaysscene.backend.entity.Movie;
+import com.todaysscene.backend.domain.Mood;
+import com.todaysscene.backend.domain.Movie;
 import com.todaysscene.backend.repository.MoodRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,7 @@ public class MoodController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @GetMapping("/{id}/movies")
     public ResponseEntity<List<Movie>> getMoviesByMood(@PathVariable String id) {
         return moodRepository.findById(id)
