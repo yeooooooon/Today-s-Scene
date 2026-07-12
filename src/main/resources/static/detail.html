@@ -1354,22 +1354,26 @@
         document.getElementById('divider2').style.display = 'block';
         setupStars(); renderReviews(); setupTrailerBackground(movieId);
 
-        const moodData = MOOD_DATA[mood];
-        if (moodData) {
-          const otherIds = pickRandom(moodData.moviePool.filter(id => id !== parseInt(movieId)), 3);
-          if (otherIds.length > 0) {
-            const others = await Promise.all(otherIds.map(id => fetchMovie(id)));
-            document.getElementById('moreSection').style.display = 'block';
-            document.getElementById('moreGrid').innerHTML = others.map(o => `
-          <div class="more-card" onclick="sessionStorage.setItem('movieId',${o.id});location.reload()">
-            <div class="more-poster" style="background-image:url('${posterUrl(o.poster_path)}')"></div>
-            <div class="more-body">
-              <div class="more-title">${o.title}</div>
-              <div class="more-meta">${o.release_date ? o.release_date.slice(0, 4) : '—'} · <strong>★ ${o.vote_average ? o.vote_average.toFixed(1) : '—'}</strong></div>
-            </div>
-          </div>`).join('');
+        try {
+          const moodRes = await fetch(`http://localhost:8080/api/moods/${mood}/movies`);
+          if (moodRes.ok) {
+            const moodMovies = await moodRes.json();
+            const moviePool = moodMovies.map(m => m.movieId);
+            const otherIds = pickRandom(moviePool.filter(id => id !== parseInt(movieId)), 3);
+            if (otherIds.length > 0) {
+              const others = await Promise.all(otherIds.map(id => fetchMovie(id)));
+              document.getElementById('moreSection').style.display = 'block';
+              document.getElementById('moreGrid').innerHTML = others.map(o => `
+            <div class="more-card" onclick="sessionStorage.setItem('movieId',${o.id});location.reload()">
+              <div class="more-poster" style="background-image:url('${posterUrl(o.poster_path)}')"></div>
+              <div class="more-body">
+                <div class="more-title">${o.title}</div>
+                <div class="more-meta">${o.release_date ? o.release_date.slice(0, 4) : '—'} · <strong>★ ${o.vote_average ? o.vote_average.toFixed(1) : '—'}</strong></div>
+              </div>
+            </div>`).join('');
+            }
           }
-        }
+        } catch(e) { console.error("추천 영화 로드 실패", e); }
       } catch (err) {
         console.error(err);
         document.getElementById('movieHero').innerHTML = `<div class="error-state" style="grid-column:1/-1"><p>영화 정보를 불러오지 못했습니다.</p><p style="margin-top:.5rem;font-size:.8rem;color:#aaa">API 키 또는 네트워크 상태를 확인해주세요.</p></div>`;

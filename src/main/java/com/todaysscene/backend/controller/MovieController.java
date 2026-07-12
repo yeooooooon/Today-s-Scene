@@ -1,7 +1,7 @@
 package com.todaysscene.backend.controller;
 
-import com.todaysscene.backend.domain.Movie;
-import com.todaysscene.backend.repository.MovieRepository;
+import com.todaysscene.backend.dto.MovieDto;
+import com.todaysscene.backend.service.MovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,22 +14,21 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class MovieController {
 
-    private final MovieRepository movieRepository;
+    private final MovieService movieService;
 
     @GetMapping
-    public List<Movie> getAllMovies() {
-        return movieRepository.findAll();
+    public List<MovieDto> getAllMovies() {
+        return movieService.getAllMovies();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Movie> getMovieById(@PathVariable Integer id) {
-        return movieRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<MovieDto> getMovieById(@PathVariable Integer id) {
+        MovieDto movie = movieService.getMovieById(id);
+        return movie != null ? ResponseEntity.ok(movie) : ResponseEntity.notFound().build();
     }
 
     @PostMapping
-    public Movie createMovie(@RequestBody Movie movie) {
-        return movieRepository.save(movie);
+    public MovieDto createMovie(@RequestBody MovieDto movieDto) {
+        return movieService.createMovie(movieDto);
     }
 }

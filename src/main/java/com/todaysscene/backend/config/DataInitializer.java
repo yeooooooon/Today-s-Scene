@@ -95,8 +95,6 @@ public class DataInitializer implements CommandLineRunner {
                                                 "보고 나면 인간 관계에 대해 한참 생각하게 돼요", "엔딩 크레딧 올라갈 때 멍하니 앉아있게 돼요",
                                                 "한 번 더 봐야 진짜 의미가 보이는 영화예요", "인생에 대해 다시 생각하게 만드는 영화예요",
                                                 "보고 나면 누군가와 이야기 나누고 싶어져요", "오래 기억에 남는, 묵직한 영화예요"));
-
-                System.out.println("✅ 프론트엔드 데이터(MOOD_DATA)가 백엔드 DB로 모두 이관되었습니다!");
         }
 
         private void initMood(String moodId, List<Integer> movieIds, List<String> reasons) {

@@ -52,7 +52,6 @@ function handleSearchInput(e) {
     return;
   }
 
-  // 디바운싱: 입력 멈춘 후 400ms 후에 검색
   searchTimer = setTimeout(async () => {
     const results = document.getElementById('searchResults');
     results.innerHTML = '<p class="search-hint">Searching...</p>';
@@ -86,7 +85,6 @@ function selectSearchResult(movieId) {
   window.location.href = 'detail.html';
 }
 
-// 검색 입력 핸들러 바인딩 및 앰비언트 글로우(Ambient Glow) 주입
 document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('input', (e) => {
     if (e.target && e.target.id === 'searchInput') {
@@ -94,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Inject Ambient Orbs
   const orb1 = document.createElement('div');
   orb1.className = 'ambient-orb orb-1';
   const orb2 = document.createElement('div');
