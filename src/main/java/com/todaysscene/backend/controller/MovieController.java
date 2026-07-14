@@ -26,9 +26,4 @@ public class MovieController {
         MovieDto movie = movieService.getMovieById(id);
         return movie != null ? ResponseEntity.ok(movie) : ResponseEntity.notFound().build();
     }
-
-    @PostMapping
-    public MovieDto createMovie(@RequestBody MovieDto movieDto) {
-        return movieService.createMovie(movieDto);
-    }
 }

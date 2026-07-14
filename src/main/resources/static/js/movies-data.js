@@ -6,9 +6,6 @@ const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMG = 'https://image.tmdb.org/t/p/w500';
 const TMDB_IMG_LG = 'https://image.tmdb.org/t/p/original';
 
-// ==========================================
-// 랜덤으로 N개 뽑기
-// ==========================================
 function pickRandom(arr, n) {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, n);
@@ -19,7 +16,7 @@ async function getTodaysPick(mood) {
     const res = await fetch(`http://localhost:8080/api/moods/${mood}`);
     if (!res.ok) throw new Error('백엔드에서 데이터를 가져오지 못했습니다.');
     const data = await res.json();
-    
+
     const moviePool = data.movies.map(m => m.movieId);
     const reasonPool = data.reasons.map(r => r.reasonText);
 

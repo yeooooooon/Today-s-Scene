@@ -29,18 +29,6 @@ public class MovieService {
                 .orElse(null);
     }
 
-    @Transactional
-    public MovieDto createMovie(MovieDto movieDto) {
-        Movie movie = new Movie();
-        movie.setMovieId(movieDto.getMovieId());
-        movie.setTitle(movieDto.getTitle());
-        movie.setPosterPath(movieDto.getPosterPath());
-        movie.setOverview(movieDto.getOverview());
-        
-        Movie savedMovie = movieRepository.save(movie);
-        return convertToDto(savedMovie);
-    }
-
     private MovieDto convertToDto(Movie movie) {
         return new MovieDto(
                 movie.getMovieId(),
