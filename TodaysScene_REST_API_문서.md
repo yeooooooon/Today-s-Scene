@@ -4,6 +4,10 @@ Base URL: `http://localhost:8080`
 
 CORS: 전체 origin 허용 (`@CrossOrigin(origins = "*")`)
 
+문서 형식은 쿠팡 Open API 문서(출고지 생성)의 구성 방식(Path / Request Parameters / Request Example / Response Message / Response Example / Error Spec)을 참고하여 작성했습니다.
+
+> 이 버전은 `POST /api/movies` (영화 등록) 엔드포인트가 코드에서 삭제된 최신 프로젝트 기준으로 작성되었습니다. 총 7개 엔드포인트.
+
 ---
 
 ## 1. 무드 전체 목록 조회
@@ -255,71 +259,7 @@ CORS: 전체 origin 허용 (`@CrossOrigin(origins = "*")`)
 
 ---
 
-## 6. 영화 등록
-
-### Path
-
-`POST`
-
-`/api/movies`
-
-### Example Endpoint
-
-`http://localhost:8080/api/movies`
-
-### Request Parameters
-
-#### Body Parameter
-
-| Name | Required | Type | Description |
-|---|---|---|---|
-| movieId | O | Integer | 영화 ID (PK, 자동 생성 아님 — 직접 지정) |
-| title | | String | 영화 제목, 최대 255자 |
-| posterPath | | String | 포스터 이미지 경로, 최대 255자 |
-| overview | | String | 줄거리 |
-
-### Request Example
-
-```json
-{
-  "movieId": 999999,
-  "title": "신규 등록 영화",
-  "posterPath": "/new-poster.jpg",
-  "overview": "새로 등록하는 영화의 줄거리입니다."
-}
-```
-
-### Response Message
-
-| Name | Type | Description |
-|---|---|---|
-| movieId | Integer | 등록된 영화 ID |
-| title | String | 영화 제목 |
-| posterPath | String | 포스터 이미지 경로 |
-| overview | String | 줄거리 |
-
-### Response Example
-
-```json
-{
-  "movieId": 999999,
-  "title": "신규 등록 영화",
-  "posterPath": "/new-poster.jpg",
-  "overview": "새로 등록하는 영화의 줄거리입니다."
-}
-```
-
-### Error Spec
-
-> 참고: 현재 구현에는 별도의 validation(@Valid) 및 예외 처리 로직이 없어, 잘못된 요청 시 Spring 기본 에러 응답(500 등)이 반환될 수 있습니다. 추후 보완이 필요한 부분입니다.
-
-### URL API Name
-
-`CREATE_MOVIE`
-
----
-
-## 7. 영화별 리뷰 목록 조회
+## 6. 영화별 리뷰 목록 조회
 
 ### Path
 
@@ -377,9 +317,9 @@ CORS: 전체 origin 허용 (`@CrossOrigin(origins = "*")`)
 
 ---
 
-## 8. 리뷰 등록
+## 7. 리뷰 등록
 
-특정 영화에 대한 리뷰를 등록합니다. 요청한 movieId의 영화가 아직 DB에 없을 경우, 최소 정보(movieId)만으로 영화 레코드를 새로 생성한 뒤 리뷰를 저장합니다.
+특정 영화에 대한 리뷰를 등록합니다. 요청한 movieId의 영화가 아직 DB에 없을 경우, 최소 정보(movieId)만으로 영화 레코드를 새로 생성한 뒤 리뷰를 저장합니다. (사용자가 직접 영화를 등록하는 별도 API는 없으며, 이 자동 생성 로직이 유일한 영화 저장 경로입니다.)
 
 ### Path
 
@@ -460,6 +400,5 @@ CORS: 전체 origin 허용 (`@CrossOrigin(origins = "*")`)
 | GET | `/api/moods/{id}/movies` | 무드별 영화 목록 조회 |
 | GET | `/api/movies` | 영화 전체 목록 조회 |
 | GET | `/api/movies/{id}` | 영화 단건 조회 |
-| POST | `/api/movies` | 영화 등록 |
 | GET | `/api/movies/{movieId}/reviews` | 영화별 리뷰 목록 조회 |
 | POST | `/api/movies/{movieId}/reviews` | 리뷰 등록 |
