@@ -57,4 +57,9 @@ public class ReviewService {
                 review.getMovie().getMovieId()
         );
     }
+
+    @Transactional
+    public void deleteReview(Long reviewId) {
+        reviewRepository.deleteById(reviewId);
+    }
 }

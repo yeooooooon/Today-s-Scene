@@ -1211,8 +1211,21 @@
         showToast('리뷰 등록에 실패했습니다.');
       }
     }
-    function deleteReview(reviewId) {
-      showToast('삭제 기능은 백엔드에서 준비 중입니다.');
+    async function deleteReview(reviewId) {
+      if (!confirm('정말 삭제하시겠습니까?')) return;
+      try {
+        const res = await fetch(`http://localhost:8080/api/movies/${currentMovieId}/reviews/${reviewId}`, {
+          method: 'DELETE'
+        });
+        if (res.ok) {
+          showToast('✓ 리뷰가 삭제되었습니다.');
+          renderReviews();
+        } else {
+          showToast('삭제에 실패했습니다.');
+        }
+      } catch (err) {
+        showToast('삭제 중 오류가 발생했습니다.');
+      }
     }
     async function renderReviews() {
       const reviews = await loadReviewsFromBackend();
