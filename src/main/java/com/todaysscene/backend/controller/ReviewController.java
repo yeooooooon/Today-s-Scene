@@ -24,7 +24,7 @@ public class ReviewController {
     }
 
     @PostMapping("/{movieId}/reviews")
-    public ResponseEntity<ReviewDto> addReview(@PathVariable Integer movieId, @RequestBody ReviewRequestDto reviewRequest) {
+    public ResponseEntity<ReviewDto> addReview(@PathVariable Integer movieId, @jakarta.validation.Valid @RequestBody ReviewRequestDto reviewRequest) {
         ReviewDto savedReview = reviewService.addReview(movieId, reviewRequest);
         return ResponseEntity.ok(savedReview);
     }
