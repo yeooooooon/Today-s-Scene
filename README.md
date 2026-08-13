@@ -32,22 +32,22 @@ OTT 플랫폼이 폭발적으로 증가하면서 사용자는 선택 피로를 �
 ### 1. 메인 페이지 (무드 선택)
 > 사용자의 현재 기분에 맞는 감정 키워드를 직관적으로 선택할 수 있습니다.
 
-![메인 화면](./images/index.png)
+![메인 화면](./src/main/resources/static/images/index.png)
 <br>
 
 ### 2. 영화 추천 결과
 > 선택한 무드에 완벽하게 어울리는 영화 3편이 추천됩니다.
 
-![추천 결과](./images/result.png)
+![추천 결과](./src/main/resources/static/images/result.png)
 <br>
 
 ### 3. 영화 상세 정보
 > 추천 영화의 상세 정보, 평점과 함께 몰입감 있는 예고편을 감상할 수 있습니다.
 
-![상세 정보](./images/detail.png)
+![상세 정보](./src/main/resources/static/images/detail.png)
 <br>
 
 ### 4. 서비스 소개 (About)
 > 'Today's Scene'의 기획 의도와 서비스 특징을 확인할 수 있습니다.
 
-![서비스 소개](./images/about.png)
+![서비스 소개](./src/main/resources/static/images/about.png)
