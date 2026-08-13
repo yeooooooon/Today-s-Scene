@@ -20,6 +20,8 @@ OTT 플랫폼이 폭발적으로 증가하면서 사용자는 선택 피로를 �
 
 ## 🛠 기술 스택 (Tech Stack)
 - **Front-end**: HTML5, CSS3, JavaScript
+- **Back-end**: Java 17, Spring Boot
+- **Database & ORM**: MySQL, Spring Data JPA
 - **Styling**: 순수 CSS 활용 (애니메이션, 반투명 효과, 컬러 트랜지션)
 - **Architecture Planning**: Mermaid (다이어그램)
 
